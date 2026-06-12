@@ -364,6 +364,24 @@
 
 ---
 
+### Phase 9-16 — 진행률 정밀 계산 + 100% 도달 시 재고 자동 완료
+
+**목표:** 진행률을 밀리초 단위로 정확하게 계산하고, 100% 도달 시 생산 완료를 자동 처리해 재고를 즉시 반영한다.
+
+**작업 목록**
+- `ProductionMenuHandler.calcProgress(ProductionJob)` 신규 추출
+  - 기존: `Duration.toMinutes()` (long, 1분 미만 → 0% 버그)
+  - 변경: `Duration.toMillis() / (totalProductionTime × 60_000)` — 밀리초 기반으로 소수점 단위까지 정확히 계산
+- `ProductionMenuHandler.showCurrent()` 재구성
+  - 진행률 계산 → 행 출력 → 100% 여부 확인 순으로 분리
+  - 100% 도달 시 `productionService.complete()` + `dataStore.save()` 자동 호출 → 재고 업데이트 메시지 출력
+- `printCurrentJobRow(ProductionJob, double progressPct)` 시그니처 변경 — 외부에서 계산된 값을 수신
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -410,4 +428,5 @@
 | 9-12 | 메인 메뉴 순서 변경 | 5↔6 스왑: 생산 라인(5) → 출고 처리(6) |
 | 9-13 | 모니터링 주문량 시료 ID 표시 | `showOrdersByStatus()` 시료명 옆 `(S-XXX)` 추가 |
 | 9-15 | 생산 현황 상세 출력 + 진행률 | `ProductionJob.startedAt` 승인 시점 기록, 현황 9컬럼 출력, 진행률(%) 실시간 계산 |
+| 9-16 | 진행률 정밀 계산 + 재고 자동 완료 | 밀리초 기반 진행률 수정, 100% 도달 시 생산 자동 완료·재고 즉시 반영 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

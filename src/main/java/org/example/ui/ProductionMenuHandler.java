@@ -45,23 +45,39 @@ public class ProductionMenuHandler {
     }
 
     private void showCurrent() {
-        Optional<ProductionJob> current = productionQueue.peek();
-        if (current.isEmpty()) {
+        Optional<ProductionJob> currentOpt = productionQueue.peek();
+        if (currentOpt.isEmpty()) {
             io.println("생산 중인 작업이 없습니다.");
             return;
         }
+        ProductionJob job = currentOpt.get();
+        double progressPct = calcProgress(job);
+
         io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %8s %12s %8s",
                 "주문번호", "시료명", "시료ID", "주문량", "재고수량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
         io.println("-".repeat(92));
-        printCurrentJobRow(current.get());
+        printCurrentJobRow(job, progressPct);
+
+        if (progressPct >= 100.0) {
+            try {
+                var completed = productionService.complete(job.getOrder().getOrderId());
+                dataStore.save();
+                io.println("[생산 완료] 재고 자동 업데이트: " + completed.getSample().getStock() + "개");
+            } catch (Exception e) {
+                io.println("[오류] " + e.getMessage());
+            }
+        }
     }
 
-    private void printCurrentJobRow(ProductionJob job) {
+    private double calcProgress(ProductionJob job) {
+        double elapsedMs = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMillis();
+        return Math.min(100.0, elapsedMs / (job.getTotalProductionTime() * 60_000) * 100.0);
+    }
+
+    private void printCurrentJobRow(ProductionJob job, double progressPct) {
         var order = job.getOrder();
         var sample = order.getSample();
         int shortfall = order.getQuantity() - sample.getStock();
-        long elapsedMinutes = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMinutes();
-        double progressPct = Math.min(100.0, elapsedMinutes / job.getTotalProductionTime() * 100.0);
         io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
                 sample.getName(),
