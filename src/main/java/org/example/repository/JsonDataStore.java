@@ -62,7 +62,7 @@ public class JsonDataStore {
                         .orElseThrow(() -> new IllegalStateException("DB 오류: 주문을 찾을 수 없습니다. id=" + dto.orderId));
                 LocalDateTime startedAt = dto.startedAt != null
                         ? LocalDateTime.parse(dto.startedAt) : LocalDateTime.now();
-                productionQueue.enqueueJob(new ProductionJob(order, dto.shortfall, startedAt));
+                productionQueue.enqueueJob(ProductionJob.restore(order, dto.shortfall, startedAt, dto.unitsAdded));
             }
         } catch (IOException e) {
             throw new UncheckedIOException("DB 로드 실패: " + dbPath, e);
@@ -99,8 +99,9 @@ public class JsonDataStore {
             for (ProductionJob job : productionQueue.getAll()) {
                 QueueItemDto dto = new QueueItemDto();
                 dto.orderId = job.getOrder().getOrderId();
-                dto.shortfall = job.getOrder().getQuantity() - job.getOrder().getSample().getStock();
+                dto.shortfall = job.getShortfall();
                 dto.startedAt = job.getStartedAt().toString();
+                dto.unitsAdded = job.getUnitsAdded();
                 snapshot.productionQueue.add(dto);
             }
 
@@ -135,5 +136,6 @@ public class JsonDataStore {
         public String orderId;
         public int shortfall;
         public String startedAt;
+        public int unitsAdded;
     }
 }

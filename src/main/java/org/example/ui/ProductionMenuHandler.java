@@ -51,14 +51,15 @@ public class ProductionMenuHandler {
             return;
         }
         ProductionJob job = currentOpt.get();
-        double progressPct = calcProgress(job);
+
+        updateStockIncremental(job);
 
         io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %8s %12s %8s",
                 "주문번호", "시료명", "시료ID", "주문량", "재고수량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
         io.println("-".repeat(92));
-        printCurrentJobRow(job, progressPct);
+        printCurrentJobRow(job);
 
-        if (progressPct >= 100.0) {
+        if (job.getRemainingUnits() == 0) {
             try {
                 var completed = productionService.complete(job.getOrder().getOrderId());
                 dataStore.save();
@@ -69,22 +70,31 @@ public class ProductionMenuHandler {
         }
     }
 
-    private double calcProgress(ProductionJob job) {
+    // avgProductionTime 단위로 1개씩 생산 완료된 수량을 재고에 증분 반영
+    private void updateStockIncremental(ProductionJob job) {
         double elapsedMs = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMillis();
-        return Math.min(100.0, elapsedMs / (job.getTotalProductionTime() * 60_000) * 100.0);
+        double avgMs = job.getOrder().getSample().getAvgProductionTime() * 60_000;
+        int unitsProduced = (int) Math.min(job.getActualProductionCount(), elapsedMs / avgMs);
+        int newUnits = unitsProduced - job.getUnitsAdded();
+        if (newUnits > 0) {
+            job.getOrder().getSample().increaseStock(newUnits);
+            job.recordUnitsAdded(newUnits);
+            dataStore.save();
+        }
     }
 
-    private void printCurrentJobRow(ProductionJob job, double progressPct) {
+    private void printCurrentJobRow(ProductionJob job) {
         var order = job.getOrder();
         var sample = order.getSample();
-        int shortfall = order.getQuantity() - sample.getStock();
+        double progressPct = job.getActualProductionCount() == 0 ? 100.0
+                : (double) job.getUnitsAdded() / job.getActualProductionCount() * 100.0;
         io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
                 sample.getName(),
                 sample.getId(),
                 order.getQuantity(),
                 sample.getStock(),
-                shortfall,
+                job.getShortfall(),
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
                 progressPct));
