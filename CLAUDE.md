@@ -23,7 +23,7 @@ Java 17+ / Gradle / JUnit 5 기반 콘솔 애플리케이션.
 
 | 엔티티 | 설명 |
 |---|---|
-| `Sample` | 시료. ID(`S-XXX`), 시료명, 평균 생산시간, 수율(0 < yield ≤ 1), 재고 수량 |
+| `Sample` | 시료. ID(`S-XXX`), 시료명, 평균 생산시간(`double`, 0 초과), 수율(0 < yield ≤ 1), 재고 수량 |
 | `Order` | 주문. 주문 ID, 고객명, 시료 참조, 주문 수량, 상태 |
 | `ProductionLine` | 생산 라인. FIFO 큐로 작업을 순차 처리 |
 
@@ -51,7 +51,7 @@ CONFIRMED → RELEASE   (출고 처리)
 
 ## 메인 메뉴 구조
 
-1. 시료 관리 — 등록 / 목록 조회 / 이름 검색
+1. 시료 관리 — 등록(초기 재고=0 고정) / 목록 조회 / 항목별 검색(ID·이름·평균생산시간·수율)
 2. 주문 접수 — 주문 등록 (`RESERVED`) / 주문 목록 조회
 3. 주문 승인/거절 — `RESERVED` 주문 목록 → 승인(재고 확인) or 거절
 4. 모니터링 — 상태별 주문 수 + 시료별 재고 현황(여유/부족/고갈)
@@ -63,7 +63,8 @@ CONFIRMED → RELEASE   (출고 처리)
 ## 예외 처리 규칙
 
 - 잘못된 상태 전이: `InvalidOrderStateTransitionException`
-- 중복 시료 ID 등록, 잘못된 수율·재고 입력: 오류 메시지 출력 후 중단
+- 중복 시료 ID 등록: 오류 메시지 출력 후 ID 재입력 요청 (다른 필드는 묻지 않음)
+- 잘못된 수율·재고 입력: 오류 메시지 출력 후 중단
 - 존재하지 않는 ID 참조: 오류 메시지 출력
 - 목록이 비었을 때: 안내 메시지 출력 후 메뉴 복귀
 
@@ -81,6 +82,15 @@ CONFIRMED → RELEASE   (출고 처리)
 # 애플리케이션 실행 (main 클래스 지정 후)
 ./gradlew run
 ```
+
+---
+
+## 데이터 영속성
+
+- 실행 종료 후에도 데이터가 유지되도록 `data/db.json`에 JSON으로 저장
+- `JsonDataStore`가 시작 시 load, 각 변경 작업(메뉴 1·2·3·5·6) 후 자동 save
+- `data/db.json`은 `.gitignore`로 제외, `data/.gitkeep`만 추적
+- Jackson 2.17.1(`jackson-databind`, `jackson-datatype-jsr310`) 사용
 
 ---
 
