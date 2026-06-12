@@ -66,7 +66,7 @@ class MonitoringMenuHandlerTest {
     }
 
     @Test
-    void handle_showStockStatus_여유_showsTable() {
+    void handle_showStockStatus_sufficient_showsTable() {
         sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
         new MonitoringMenuHandler(io("2\n0\n"), monitorSvc).handle();
         assertTrue(output().contains("S-001"), output());
@@ -80,7 +80,7 @@ class MonitoringMenuHandlerTest {
     }
 
     @Test
-    void handle_showStockStatus_부족_showsStatus() {
+    void handle_showStockStatus_shortage_showsStatus() {
         Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
         sampleRepo.save(s);
         Order o = new Order(orderRepo.generateNextId(), "고객A", s, 5);
@@ -90,7 +90,7 @@ class MonitoringMenuHandlerTest {
     }
 
     @Test
-    void handle_showStockStatus_고갈_showsStatus() {
+    void handle_showStockStatus_depleted_showsStatus() {
         sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 0));
         new MonitoringMenuHandler(io("2\n0\n"), monitorSvc).handle();
         assertTrue(output().contains("고갈"), output());
