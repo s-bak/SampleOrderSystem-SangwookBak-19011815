@@ -78,15 +78,18 @@ public class ProductionMenuHandler {
             io.println("대기 중인 작업이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %8s %14s %16s", "주문ID", "시료명", "실생산수", "예상총생산시간(min)", "접수시각"));
-        io.println("-".repeat(67));
+        io.println(String.format("%-8s %-15s %-8s %6s %8s %14s %16s", "주문ID", "시료명", "시료ID", "주문량", "실생산수", "예상총생산시간(min)", "접수시각"));
+        io.println("-".repeat(85));
         waiting.forEach(this::printJobRow);
     }
 
     private void printJobRow(ProductionJob job) {
-        io.println(String.format("%-8s %-15s %8d %14.1f %16s",
-                job.getOrder().getOrderId(),
-                job.getOrder().getSample().getName(),
+        var order = job.getOrder();
+        io.println(String.format("%-8s %-15s %-8s %6d %8d %14.1f %16s",
+                order.getOrderId(),
+                order.getSample().getName(),
+                order.getSample().getId(),
+                order.getQuantity(),
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
                 job.getEnqueuedAt().format(DT_FMT)));
