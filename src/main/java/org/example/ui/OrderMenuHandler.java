@@ -66,6 +66,10 @@ public class OrderMenuHandler {
         }
     }
 
+    private static final String ORDER_SEP        = "+----------+------------+------------------------+--------+--------------+---------------------+";
+    private static final String ORDER_HEADER_FMT = "| %-8s | %-10s | %-22s | %6s | %-12s | %-19s |";
+    private static final String ORDER_ROW_FMT    = "| %-8s | %-10s | %-22s | %6d | %-12s | %-19s |";
+
     private void listAll() {
         List<Order> list = orderService.findAll();
         if (list.isEmpty()) {
@@ -77,15 +81,16 @@ public class OrderMenuHandler {
     }
 
     private void printHeader() {
-        io.println(String.format("%-8s %-10s %-22s %6s %-12s %s",
-                "주문ID", "고객명", "시료명 (ID)", "수량", "상태", "등록일시"));
-        io.println("-".repeat(79));
+        io.println(ORDER_SEP);
+        io.println(String.format(ORDER_HEADER_FMT, "주문ID", "고객명", "시료명 (ID)", "수량", "상태", "등록일시"));
+        io.println(ORDER_SEP);
     }
 
     private void printRow(Order o) {
         String sampleCell = o.getSample().getName() + " (" + o.getSample().getId() + ")";
-        io.println(String.format("%-8s %-10s %-22s %6d %-12s %s",
+        io.println(String.format(ORDER_ROW_FMT,
                 o.getOrderId(), o.getCustomerName(), sampleCell,
                 o.getQuantity(), o.getStatus(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+        io.println(ORDER_SEP);
     }
 }

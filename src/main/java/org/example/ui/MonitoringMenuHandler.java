@@ -43,6 +43,10 @@ public class MonitoringMenuHandler {
         }
     }
 
+    private static final String OS_SEP        = "+----------+------------+------------------------+--------+";
+    private static final String OS_HEADER_FMT = "| %-8s | %-10s | %-22s | %6s |";
+    private static final String OS_ROW_FMT    = "| %-8s | %-10s | %-22s | %6d |";
+
     private void showOrdersByStatus() {
         Map<OrderStatus, List<Order>> map = monitoringService.getOrdersByStatus();
         for (OrderStatus status : new OrderStatus[]{
@@ -52,13 +56,15 @@ public class MonitoringMenuHandler {
             String color = colorOf(status);
             io.println(color + "\n[" + status + "] " + orders.size() + "건" + RESET);
             if (!orders.isEmpty()) {
-                io.println(color + String.format("  %-8s %-10s %-22s %6s", "주문ID", "고객명", "시료명 (ID)", "수량") + RESET);
-                io.println(color + "  " + "-".repeat(51) + RESET);
+                io.println(color + OS_SEP + RESET);
+                io.println(color + String.format(OS_HEADER_FMT, "주문ID", "고객명", "시료명 (ID)", "수량") + RESET);
+                io.println(color + OS_SEP + RESET);
                 for (Order o : orders) {
                     String sampleLabel = o.getSample().getName() + " (" + o.getSample().getId() + ")";
-                    io.println(color + String.format("  %-8s %-10s %-22s %6d",
+                    io.println(color + String.format(OS_ROW_FMT,
                             o.getOrderId(), o.getCustomerName(),
                             sampleLabel, o.getQuantity()) + RESET);
+                    io.println(color + OS_SEP + RESET);
                 }
             }
         }
@@ -74,20 +80,25 @@ public class MonitoringMenuHandler {
         };
     }
 
+    private static final String STOCK_SEP        = "+----------+-----------------+--------+----------+--------+";
+    private static final String STOCK_HEADER_FMT = "| %-8s | %-15s | %6s | %8s | %6s |";
+    private static final String STOCK_ROW_FMT    = "| %-8s | %-15s | %6d | %8d | %6s |";
+
     private void showStockStatus() {
         List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
         if (entries.isEmpty()) {
             io.println("등록된 시료가 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %6s %8s %6s",
-                "시료ID", "시료명", "재고", "대기수량", "상태"));
-        io.println("-".repeat(50));
+        io.println(STOCK_SEP);
+        io.println(String.format(STOCK_HEADER_FMT, "시료ID", "시료명", "재고", "대기수량", "상태"));
+        io.println(STOCK_SEP);
         for (MonitoringService.StockStatusEntry e : entries) {
             String color = stockColorOf(e.getStatus());
-            io.println(color + String.format("%-8s %-15s %6d %8d %6s",
+            io.println(color + String.format(STOCK_ROW_FMT,
                     e.getSample().getId(), e.getSample().getName(),
                     e.getSample().getStock(), e.getPendingQuantity(), e.getStatus()) + RESET);
+            io.println(STOCK_SEP);
         }
     }
 

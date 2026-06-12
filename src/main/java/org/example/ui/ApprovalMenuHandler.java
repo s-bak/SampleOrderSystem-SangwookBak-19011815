@@ -44,19 +44,24 @@ public class ApprovalMenuHandler {
         }
     }
 
+    private static final String APPROVAL_SEP        = "+----------+------------+-----------------+--------+---------------------+";
+    private static final String APPROVAL_HEADER_FMT = "| %-8s | %-10s | %-15s | %6s | %-19s |";
+    private static final String APPROVAL_ROW_FMT    = "| %-8s | %-10s | %-15s | %6d | %-19s |";
+
     private void listReserved() {
         List<Order> list = orderRepository.findByStatus(OrderStatus.RESERVED);
         if (list.isEmpty()) {
             io.println("대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-10s %-15s %6s %s",
-                "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println("-".repeat(60));
+        io.println(APPROVAL_SEP);
+        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println(APPROVAL_SEP);
         for (Order o : list) {
-            io.println(String.format("%-8s %-10s %-15s %6d %s",
+            io.println(String.format(APPROVAL_ROW_FMT,
                     o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
                     o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+            io.println(APPROVAL_SEP);
         }
     }
 
@@ -66,13 +71,14 @@ public class ApprovalMenuHandler {
             io.println("거절된 주문이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-10s %-15s %6s %s",
-                "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println("-".repeat(60));
+        io.println(APPROVAL_SEP);
+        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println(APPROVAL_SEP);
         for (Order o : list) {
-            io.println(String.format("%-8s %-10s %-15s %6d %s",
+            io.println(String.format(APPROVAL_ROW_FMT,
                     o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
                     o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+            io.println(APPROVAL_SEP);
         }
     }
 

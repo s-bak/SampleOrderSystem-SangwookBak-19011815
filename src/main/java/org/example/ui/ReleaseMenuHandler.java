@@ -40,17 +40,23 @@ public class ReleaseMenuHandler {
         }
     }
 
+    private static final String RELEASE_SEP        = "+----------+------------+-----------------+--------+";
+    private static final String RELEASE_HEADER_FMT = "| %-8s | %-10s | %-15s | %6s |";
+    private static final String RELEASE_ROW_FMT    = "| %-8s | %-10s | %-15s | %6d |";
+
     private void listConfirmed() {
         List<Order> list = orderRepository.findByStatus(OrderStatus.CONFIRMED);
         if (list.isEmpty()) {
             io.println("출고 대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-10s %-15s %6s", "주문ID", "고객명", "시료명", "수량"));
-        io.println("-".repeat(44));
+        io.println(RELEASE_SEP);
+        io.println(String.format(RELEASE_HEADER_FMT, "주문ID", "고객명", "시료명", "수량"));
+        io.println(RELEASE_SEP);
         for (Order o : list) {
-            io.println(String.format("%-8s %-10s %-15s %6d",
+            io.println(String.format(RELEASE_ROW_FMT,
                     o.getOrderId(), o.getCustomerName(), o.getSample().getName(), o.getQuantity()));
+            io.println(RELEASE_SEP);
         }
     }
 

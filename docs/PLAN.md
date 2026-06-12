@@ -509,6 +509,36 @@
 
 ---
 
+### Phase 9-24 — orderSequence 중복 증가 버그 수정
+
+**목표:** 시스템 재시작 후 주문 ID가 실제 주문 수보다 크게 시작되는 버그를 수정한다.
+
+**작업 목록**
+- `OrderRepository.restoreFromDb(Order)` 추가 — `save()`와 달리 `sequence`를 변경하지 않음
+- `JsonDataStore.load()`: `orderRepository.save(order)` → `orderRepository.restoreFromDb(order)` 교체
+  - 기존 `save()` 호출은 DB 로드 시마다 `sequence`를 증가시켜 재시작 후 주문 ID가 잘못 발급되는 문제 야기
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
+### Phase 9-25 — 전체 메뉴 테이블 `|` 구분자 형식 통일
+
+**목표:** 모든 메뉴의 테이블 출력을 `SampleMenuHandler`와 동일한 `|` 컬럼 구분자 + `+---+` 경계선 형식으로 통일한다.
+
+**작업 목록**
+- `OrderMenuHandler`: `ORDER_SEP`, `ORDER_HEADER_FMT`, `ORDER_ROW_FMT` 상수 정의; `printHeader()`·`printRow()` 수정 (각 행 하단 구분선 포함)
+- `ApprovalMenuHandler`: `APPROVAL_SEP`, `APPROVAL_HEADER_FMT`, `APPROVAL_ROW_FMT` 상수 정의; `listReserved()`·`listRejected()` 수정
+- `MonitoringMenuHandler`: `OS_SEP`/`OS_HEADER_FMT`/`OS_ROW_FMT` (주문량 확인), `STOCK_SEP`/`STOCK_HEADER_FMT`/`STOCK_ROW_FMT` (재고량 확인) 추가; ANSI 색상 유지
+- `ReleaseMenuHandler`: `RELEASE_SEP`, `RELEASE_HEADER_FMT`, `RELEASE_ROW_FMT` 상수 정의; `listConfirmed()` 수정
+- `ProductionMenuHandler`: `CURRENT_SEP`/`CURRENT_HEADER_FMT`/`CURRENT_ROW_FMT` (현황), `WAITING_SEP`/`WAITING_HEADER_FMT`/`WAITING_ROW_FMT` (대기 큐) 추가
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -563,4 +593,6 @@
 | 9-21 | 대기 주문 시료ID·주문량 표시 | `printJobRow()` 시료ID·주문량 컬럼 추가 |
 | 9-22 | 재고 단위별 점진 업데이트 | `ProductionJob.stockAdded`, 스케줄러 msPerUnit 기반 1개씩 증가, `complete()`에서 `increaseStock` 제거 |
 | 9-23 | 가용 재고 계산 버그 수정 | `available = stock − confirmedQty − producingStockAdded` |
+| 9-24 | orderSequence 중복 증가 버그 수정 | `OrderRepository.restoreFromDb()`, `JsonDataStore.load()` 교체 |
+| 9-25 | 전체 테이블 `\|` 구분자 형식 통일 | 모든 `*MenuHandler` 테이블을 `+---+`/`\| col \|` 형식으로 통일 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
