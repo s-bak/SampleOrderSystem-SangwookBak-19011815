@@ -5,6 +5,8 @@ import org.example.domain.ProductionQueue;
 import org.example.repository.JsonDataStore;
 import org.example.service.ProductionService;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,9 +50,28 @@ public class ProductionMenuHandler {
             io.println("생산 중인 작업이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %8s %12s", "주문ID", "시료명", "실생산수", "총생산시간(min)"));
-        io.println("-".repeat(48));
-        printJobRow(current.get());
+        io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %8s %12s %8s",
+                "주문번호", "시료명", "시료ID", "주문량", "재고수량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
+        io.println("-".repeat(92));
+        printCurrentJobRow(current.get());
+    }
+
+    private void printCurrentJobRow(ProductionJob job) {
+        var order = job.getOrder();
+        var sample = order.getSample();
+        int shortfall = order.getQuantity() - sample.getStock();
+        long elapsedMinutes = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMinutes();
+        double progressPct = Math.min(100.0, elapsedMinutes / job.getTotalProductionTime() * 100.0);
+        io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
+                order.getOrderId(),
+                sample.getName(),
+                sample.getId(),
+                order.getQuantity(),
+                sample.getStock(),
+                shortfall,
+                job.getActualProductionCount(),
+                job.getTotalProductionTime(),
+                progressPct));
     }
 
     private void showWaiting() {

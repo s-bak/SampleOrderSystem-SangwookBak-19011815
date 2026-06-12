@@ -1,5 +1,6 @@
 package org.example.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,7 @@ public class ProductionQueue {
 
     public void enqueue(Order order) {
         int shortfall = order.getQuantity() - order.getSample().getStock();
-        queue.add(new ProductionJob(order, shortfall));
+        queue.add(new ProductionJob(order, shortfall, LocalDateTime.now()));
     }
 
     public Optional<ProductionJob> peek() {

@@ -25,7 +25,8 @@ Java 17+ / Gradle / JUnit 5 기반 콘솔 애플리케이션.
 |---|---|
 | `Sample` | 시료. ID(`S-XXX`), 시료명, 평균 생산시간(`double`, 0 초과), 수율(0 < yield ≤ 1), 재고 수량 |
 | `Order` | 주문. 주문 ID, 고객명, 시료 참조, 주문 수량, 상태 |
-| `ProductionLine` | 생산 라인. FIFO 큐로 작업을 순차 처리 |
+| `ProductionJob` | 생산 작업. Order, 실생산량, 소요시간, 승인 시점(`startedAt`) 보유 |
+| `ProductionQueue` | 생산 라인. FIFO 큐로 작업을 순차 처리; `enqueue()` 시 `LocalDateTime.now()`를 `startedAt`으로 기록 |
 
 ### 주문 상태 (`OrderStatus`)
 
@@ -55,7 +56,7 @@ CONFIRMED → RELEASE   (출고 처리)
 2. 주문 접수 — 주문 등록 (`RESERVED`) / 주문 목록 조회
 3. 주문 승인/거절 — 접수 주문 목록 / 거절 주문 목록 / 승인(재고 확인) / 거절; 대기 주문 없으면 승인·거절 즉시 차단
 4. 모니터링 — 상태별 주문 수(RESERVED=하늘색·PRODUCING=주황색·CONFIRMED=연두색·RELEASE=연보라색, 시료명 옆 시료 ID 표시) + 시료별 재고 현황(여유=연두색·부족=주황색·고갈=빨강색)
-5. 생산 라인 — 생산 현황 / 대기 큐 / 생산 완료 처리
+5. 생산 라인 — 생산 현황(주문번호·시료명·시료ID·주문량·재고수량·부족수량·실생산량·소요시간·진행률) / 대기 큐 / 생산 완료 처리
 6. 출고 처리 — `CONFIRMED` 주문 출고 → `RELEASE`
 
 ---

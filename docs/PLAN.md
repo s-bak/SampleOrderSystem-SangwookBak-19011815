@@ -341,6 +341,29 @@
 
 ---
 
+### Phase 9-15 — 생산 현황 조회 상세 출력 + 진행률
+
+**목표:** 생산 현황 조회 화면에 주문·시료 전체 정보와 실시간 진행률을 표시한다.
+
+**작업 목록**
+- `ProductionJob`
+  - `startedAt(LocalDateTime)` 필드 추가
+  - 생성자 시그니처를 `(Order, int shortfall, LocalDateTime startedAt)`으로 변경 — `now()`를 생성자 내부에서 호출하지 않음
+- `ProductionQueue.enqueue(Order)`: `LocalDateTime.now()`를 캡처해 `ProductionJob` 생성 — **승인 시점**이 `startedAt`으로 기록됨
+- `JsonDataStore`
+  - `QueueItemDto`에 `startedAt(String)` 필드 추가
+  - save/load 시 ISO-8601 문자열로 직렬화/역직렬화 (기존 DB에 값 없으면 현재 시각 fallback)
+- `ProductionMenuHandler.showCurrent()`: 출력 컬럼 변경
+  - 기존: 주문ID, 시료명, 실생산수, 총생산시간
+  - 변경: 주문번호, 시료명, 시료ID, 주문량, 재고수량, 부족수량, 실생산량, 소요시간(min), 진행률(%)
+- `printCurrentJobRow()` 신규 추가 (대기 큐용 `printJobRow()`와 분리)
+  - 진행률 = `min(100.0, Duration.between(startedAt, now).toMinutes() / totalProductionTime * 100)`
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -386,4 +409,5 @@
 | 9-11 | 모니터링 ANSI 색상 표시 | `MonitoringMenuHandler` 상태별·재고별 ANSI 글자색 |
 | 9-12 | 메인 메뉴 순서 변경 | 5↔6 스왑: 생산 라인(5) → 출고 처리(6) |
 | 9-13 | 모니터링 주문량 시료 ID 표시 | `showOrdersByStatus()` 시료명 옆 `(S-XXX)` 추가 |
+| 9-15 | 생산 현황 상세 출력 + 진행률 | `ProductionJob.startedAt` 승인 시점 기록, 현황 9컬럼 출력, 진행률(%) 실시간 계산 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
