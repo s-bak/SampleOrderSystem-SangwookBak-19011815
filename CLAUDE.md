@@ -88,7 +88,7 @@ CONFIRMED → RELEASE   (출고 처리)
 ## 데이터 영속성
 
 - 실행 종료 후에도 데이터가 유지되도록 `data/db.json`에 JSON으로 저장
-- `JsonDataStore`가 시작 시 load, 각 변경 작업(메뉴 1·2·3·5·6) 후 자동 save
+- `JsonDataStore`가 시작 시 load, 각 데이터 변경(시료 등록·주문 등록·승인·거절·출고·생산 완료) 성공 직후 즉시 save
 - `data/db.json`은 `.gitignore`로 제외, `data/.gitkeep`만 추적
 - Jackson 2.17.1(`jackson-databind`, `jackson-datatype-jsr310`) 사용
 

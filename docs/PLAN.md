@@ -236,6 +236,40 @@
 
 ---
 
+### Phase 9-06 — 시료 목록 테이블 정렬 개선
+
+**목표:** 시료 목록 조회 시 컬럼 구분자(`|`)와 정렬이 맞도록 출력 형식을 개선한다.
+
+**작업 목록**
+- `SampleMenuHandler`: `printSeparator()`, `printHeader()`, `printRow()` 추가
+  - `+---+` 형식의 테두리 구분선 사용
+  - 헤더·데이터 행 모두 동일한 `String.format` 패턴 사용 (Java 문자 수 기준 정렬)
+
+---
+
+### Phase 9-07 — 주문 등록 시료 ID 검증 및 주문 목록 시료 ID 표시
+
+**목표:** 주문 등록 시 존재하지 않는 시료 ID 즉시 검증, 주문 목록에서 시료명 옆에 시료 ID 표시.
+
+**작업 목록**
+- `OrderMenuHandler`: `SampleService` 주입, `placeOrder()` ID 입력 루프 추가
+- `MainMenu`: `OrderMenuHandler` 생성자에 `sampleService` 전달
+- `OrderMenuHandler.printRow()`: `시료명 (시료ID)` 형태로 출력
+- `OrderMenuHandler.printHeader()`: 헤더도 `시료명 (ID)` 컬럼으로 수정
+
+---
+
+### Phase 9-08 — 변경 작업 직후 즉시 JSON 저장
+
+**목표:** 각 데이터 변경 성공 직후 즉시 `data/db.json`에 저장한다.
+
+**작업 목록**
+- `SampleMenuHandler`, `OrderMenuHandler`, `ApprovalMenuHandler`, `ReleaseMenuHandler`, `ProductionMenuHandler` 각각에 `JsonDataStore` 주입
+- 시료 등록·주문 등록·승인·거절·출고·생산 완료 성공 직후 `dataStore.save()` 호출
+- `MainMenu`: 핸들러 종료 후 일괄 `save()` 호출 제거
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -273,4 +307,7 @@
 | 9-03 | 중복 ID 즉시 검증 | `SampleMenuHandler` ID 루프 재입력 |
 | 9-04 | 평균 생산시간 double | `Sample`, `ProductionJob`, `ConsoleIO.readDouble()` |
 | 9-05 | 시료 검색 항목 선택 | ID·이름·생산시간·수율별 검색 |
+| 9-06 | 시료 목록 테이블 정렬 | `+---+` 구분선, `String.format` 기준 컬럼 정렬 |
+| 9-07 | 주문 시료 ID 검증 + 목록 표시 | 주문 등록 ID 루프, 주문 목록 `시료명 (ID)` 출력 |
+| 9-08 | 변경 직후 즉시 저장 | 각 핸들러에 `JsonDataStore` 주입, 성공 직후 `save()` |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
