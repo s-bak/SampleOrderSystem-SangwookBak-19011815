@@ -11,8 +11,7 @@ public class ProductionQueue {
 
     private final Queue<ProductionJob> queue = new LinkedList<>();
 
-    public void enqueue(Order order) {
-        int shortfall = order.getQuantity() - order.getSample().getStock();
+    public void enqueue(Order order, int shortfall) {
         boolean wasEmpty = queue.isEmpty();
         ProductionJob job = new ProductionJob(order, shortfall, LocalDateTime.now());
         queue.add(job);

@@ -41,7 +41,8 @@ class ApprovalServiceTest {
         Order order = savedOrder(s, 5);
         Order result = approvalService.approve(order.getOrderId());
         assertEquals(OrderStatus.CONFIRMED, result.getStatus());
-        assertEquals(5, s.getStock());
+        // 재고 차감은 출고(RELEASE) 시점에 발생 — CONFIRMED 승인 시 재고 불변
+        assertEquals(10, s.getStock());
     }
 
     @Test
@@ -50,7 +51,7 @@ class ApprovalServiceTest {
         Order order = savedOrder(s, 5);
         Order result = approvalService.approve(order.getOrderId());
         assertEquals(OrderStatus.CONFIRMED, result.getStatus());
-        assertEquals(0, s.getStock());
+        assertEquals(5, s.getStock());
     }
 
     @Test

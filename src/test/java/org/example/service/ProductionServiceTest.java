@@ -46,13 +46,11 @@ class ProductionServiceTest {
 
     @Test
     void complete_stockIncreased() {
-        // stock=2, quantity=10, shortfall=8, yield=1.0
-        // actualCount = ceil(8 / (1.0×0.9)) = ceil(8.888) = 9
-        // 완료 후 stock = 2(기존) + 9(생산) = 11
+        // stock=2, quantity=10, shortfall=8
+        // 완료 후 stock = 2(기존) + 8(부족분) = 10 — 주문 수량을 정확히 충족
         Order order = producingOrder(2, 10);
-        int stockBefore = order.getSample().getStock();
         productionService.complete(order.getOrderId());
-        assertEquals(11, order.getSample().getStock());
+        assertEquals(10, order.getSample().getStock());
     }
 
     @Test

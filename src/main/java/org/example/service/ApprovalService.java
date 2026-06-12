@@ -19,11 +19,19 @@ public class ApprovalService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 ID입니다: " + orderId));
 
-        if (order.getSample().getStock() >= order.getQuantity()) {
-            order.getSample().decreaseStock(order.getQuantity());
+        // CONFIRMED 주문이 이미 점유한 수량을 제외한 가용 재고
+        int confirmedQty = orderRepository.findByStatus(OrderStatus.CONFIRMED)
+                .stream()
+                .filter(o -> o.getSample().getId().equals(order.getSample().getId()))
+                .mapToInt(Order::getQuantity)
+                .sum();
+        int available = order.getSample().getStock() - confirmedQty;
+
+        if (available >= order.getQuantity()) {
             order.transitionTo(OrderStatus.CONFIRMED);
         } else {
-            productionQueue.enqueue(order);
+            int shortfall = order.getQuantity() - Math.max(0, available);
+            productionQueue.enqueue(order, shortfall);
             order.transitionTo(OrderStatus.PRODUCING);
         }
         return order;

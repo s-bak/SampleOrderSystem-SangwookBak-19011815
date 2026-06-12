@@ -2,6 +2,8 @@ package org.example.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductionJobTest {
@@ -19,7 +21,7 @@ class ProductionJobTest {
         // shortfall=5, yield=0.8 → ceil(5 / (0.8×0.9)) = ceil(5/0.72) = ceil(6.944) = 7
         Sample s = sample(0.8, 30);
         Order o = new Order("O-001", "고객A", s, 10);
-        ProductionJob job = new ProductionJob(o, 5);
+        ProductionJob job = new ProductionJob(o, 5, LocalDateTime.now());
         assertEquals(7, job.getActualProductionCount());
     }
 
@@ -28,7 +30,7 @@ class ProductionJobTest {
         // shortfall=9, yield=1.0 → ceil(9 / (1.0×0.9)) = ceil(10.0) = 10
         Sample s = sample(1.0, 30);
         Order o = new Order("O-001", "고객A", s, 10);
-        ProductionJob job = new ProductionJob(o, 9);
+        ProductionJob job = new ProductionJob(o, 9, LocalDateTime.now());
         assertEquals(10, job.getActualProductionCount());
     }
 
@@ -37,7 +39,7 @@ class ProductionJobTest {
         // shortfall=5, yield=0.8, avgTime=30 → actualCount=7, totalTime=210
         Sample s = sample(0.8, 30);
         Order o = new Order("O-001", "고객A", s, 10);
-        ProductionJob job = new ProductionJob(o, 5);
+        ProductionJob job = new ProductionJob(o, 5, LocalDateTime.now());
         assertEquals(210, job.getTotalProductionTime());
     }
 
@@ -45,13 +47,13 @@ class ProductionJobTest {
     void shortfall_zero_throws() {
         Sample s = sample(0.8, 30);
         Order o = order(s);
-        assertThrows(IllegalArgumentException.class, () -> new ProductionJob(o, 0));
+        assertThrows(IllegalArgumentException.class, () -> new ProductionJob(o, 0, LocalDateTime.now()));
     }
 
     @Test
     void shortfall_negative_throws() {
         Sample s = sample(0.8, 30);
         Order o = order(s);
-        assertThrows(IllegalArgumentException.class, () -> new ProductionJob(o, -1));
+        assertThrows(IllegalArgumentException.class, () -> new ProductionJob(o, -1, LocalDateTime.now()));
     }
 }

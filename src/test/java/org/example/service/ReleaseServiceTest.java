@@ -35,6 +35,8 @@ class ReleaseServiceTest {
         order.transitionTo(OrderStatus.CONFIRMED);
         Order result = releaseService.release(order.getOrderId());
         assertEquals(OrderStatus.RELEASE, result.getStatus());
+        // 출고 시점에 재고 차감
+        assertEquals(95, sample.getStock());
     }
 
     @Test

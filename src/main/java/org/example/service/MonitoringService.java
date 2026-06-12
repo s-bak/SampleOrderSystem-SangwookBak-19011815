@@ -33,17 +33,19 @@ public class MonitoringService {
 
     public List<StockStatusEntry> getStockStatus() {
         List<StockStatusEntry> entries = new ArrayList<>();
-        int pendingQuantity;
         for (Sample sample : sampleRepository.findAll()) {
-            pendingQuantity = 0;
+            int pendingQuantity = 0;
+            int confirmedQuantity = 0;
             for (Order order : orderRepository.findAll()) {
-                if (order.getSample().getId().equals(sample.getId())
-                        && (order.getStatus() == OrderStatus.RESERVED
-                        || order.getStatus() == OrderStatus.PRODUCING)) {
+                if (!order.getSample().getId().equals(sample.getId())) continue;
+                if (order.getStatus() == OrderStatus.RESERVED
+                        || order.getStatus() == OrderStatus.PRODUCING) {
                     pendingQuantity += order.getQuantity();
+                } else if (order.getStatus() == OrderStatus.CONFIRMED) {
+                    confirmedQuantity += order.getQuantity();
                 }
             }
-            entries.add(new StockStatusEntry(sample, pendingQuantity));
+            entries.add(new StockStatusEntry(sample, pendingQuantity, confirmedQuantity));
         }
         return entries;
     }
@@ -54,15 +56,17 @@ public class MonitoringService {
         private final String status;
         private final int pendingQuantity;
 
-        public StockStatusEntry(Sample sample, int pendingQuantity) {
+        public StockStatusEntry(Sample sample, int pendingQuantity, int confirmedQuantity) {
             this.sample = sample;
             this.pendingQuantity = pendingQuantity;
-            this.status = determineStatus(sample.getStock(), pendingQuantity);
+            this.status = determineStatus(sample.getStock(), confirmedQuantity, pendingQuantity);
         }
 
-        private static String determineStatus(int stock, int pendingQuantity) {
-            if (stock == 0) return "고갈";
-            if (stock >= pendingQuantity) return "여유";
+        // available = stock - confirmedQuantity (CONFIRMED 주문에 할당된 재고 제외)
+        private static String determineStatus(int stock, int confirmedQuantity, int pendingQuantity) {
+            int available = Math.max(0, stock - confirmedQuantity);
+            if (available == 0) return "고갈";
+            if (available >= pendingQuantity) return "여유";
             return "부족";
         }
 

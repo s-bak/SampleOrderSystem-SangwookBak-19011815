@@ -15,6 +15,7 @@ public class ReleaseService {
     public Order release(String orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 ID입니다: " + orderId));
+        order.getSample().decreaseStock(order.getQuantity());
         order.transitionTo(OrderStatus.RELEASE);
         return order;
     }
