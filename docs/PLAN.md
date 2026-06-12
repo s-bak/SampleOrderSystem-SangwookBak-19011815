@@ -287,8 +287,8 @@
 **목표:** 시료 등록 시 시료명, 주문 등록 시 고객명이 공백이면 오류 메시지를 출력하고 중단한다.
 
 **작업 목록**
-- `SampleMenuHandler.register()`: 시료명 입력 직후 `isBlank()` 검증 → 공백이면 오류 출력 후 반환
-- `OrderMenuHandler.placeOrder()`: 고객명 입력 직후 `isBlank()` 검증 → 공백이면 오류 출력 후 반환
+- `SampleMenuHandler.register()`: 시료명 입력 루프 — `isBlank()` 시 오류 출력 후 재입력
+- `OrderMenuHandler.placeOrder()`: 고객명 입력 루프 — `isBlank()` 시 오류 출력 후 재입력
 
 ---
 

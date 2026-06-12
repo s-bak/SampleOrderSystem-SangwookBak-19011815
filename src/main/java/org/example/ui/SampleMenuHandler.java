@@ -49,11 +49,12 @@ public class SampleMenuHandler {
                 break;
             }
         }
-        io.print("시료명: ");
-        String name = io.readLine();
-        if (name.isBlank()) {
+        String name;
+        while (true) {
+            io.print("시료명: ");
+            name = io.readLine();
+            if (!name.isBlank()) break;
             io.println("[오류] 시료명은 공백일 수 없습니다.");
-            return;
         }
         double avgTime = io.readDouble("평균 생산시간 (min, 0 초과): ");
         if (Double.isNaN(avgTime) || avgTime <= 0) {

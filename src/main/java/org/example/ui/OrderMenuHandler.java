@@ -49,11 +49,12 @@ public class OrderMenuHandler {
             }
             io.println("[오류] 존재하지 않는 시료 ID입니다: " + sampleId);
         }
-        io.print("고객명: ");
-        String customerName = io.readLine();
-        if (customerName.isBlank()) {
+        String customerName;
+        while (true) {
+            io.print("고객명: ");
+            customerName = io.readLine();
+            if (!customerName.isBlank()) break;
             io.println("[오류] 고객명은 공백일 수 없습니다.");
-            return;
         }
         int quantity = io.readInt("주문 수량: ");
         try {
