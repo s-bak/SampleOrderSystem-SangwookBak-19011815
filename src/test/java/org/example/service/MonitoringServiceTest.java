@@ -77,7 +77,7 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_재고있고대기있으면_부족() {
+    void getStockStatus_withStockAndPendingOrders_returnsShortage() {
         Sample s = registerSample("S-001", 10);
         placeOrder(s, 5);
 
@@ -89,7 +89,7 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_부족() {
+    void getStockStatus_shortage() {
         Sample s = registerSample("S-001", 3);
         placeOrder(s, 5);
 
@@ -98,7 +98,7 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_고갈() {
+    void getStockStatus_depleted() {
         registerSample("S-001", 0);
 
         List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
@@ -106,7 +106,7 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_noPending_여유() {
+    void getStockStatus_noPending_sufficient() {
         registerSample("S-001", 5);
 
         List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
@@ -115,7 +115,7 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_noPending_고갈() {
+    void getStockStatus_noPending_depleted() {
         registerSample("S-001", 0);
 
         List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
