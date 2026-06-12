@@ -4,6 +4,12 @@
 **기술 스택:** Java 17+, Gradle, JUnit 5  
 **개발 원칙:** 각 Phase는 독립적으로 빌드·테스트 가능하도록 구성한다.
 
+**진행 절차 (매 Phase 공통)**
+1. `docs/design/phaseN.md` 설계 문서 작성 → 사용자 검토 요청
+2. 사용자 승인 후 구현 시작
+3. `./gradlew test` BUILD SUCCESSFUL 확인
+4. 사용자 승인 후 `git push` 실행
+
 ---
 
 ## Phase 1 — 프로젝트 골격 및 패키지 구조 설정
