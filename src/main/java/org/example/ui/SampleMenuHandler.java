@@ -36,8 +36,16 @@ public class SampleMenuHandler {
     }
 
     private void register() {
-        io.print("시료 ID (예: S-001): ");
-        String id = io.readLine();
+        String id;
+        while (true) {
+            io.print("시료 ID (예: S-001): ");
+            id = io.readLine();
+            if (sampleService.existsById(id)) {
+                io.println("[오류] 이미 존재하는 시료 ID입니다: " + id);
+            } else {
+                break;
+            }
+        }
         io.print("시료명: ");
         String name = io.readLine();
         int avgTime = io.readInt("평균 생산시간 (min): ");

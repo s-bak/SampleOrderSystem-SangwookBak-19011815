@@ -34,4 +34,8 @@ public class SampleService {
         return sampleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시료 ID입니다: " + id));
     }
+
+    public boolean existsById(String id) {
+        return sampleRepository.findById(id).isPresent();
+    }
 }
