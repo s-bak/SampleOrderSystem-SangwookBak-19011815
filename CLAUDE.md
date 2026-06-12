@@ -135,6 +135,7 @@ CONFIRMED → RELEASE   (출고 처리)
 - 헤더 위·아래, 각 데이터 행 아래에 `+---+` 형식의 구분선 출력
 - 컬럼 구분자는 `|`, 구분선은 컬럼 너비 + 2 길이의 `-` 사용
 - 각 핸들러는 `SEP`, `HEADER_FMT`, `ROW_FMT` 3개 상수를 `private static final`로 정의
+- 동일 포맷의 테이블을 여러 메서드에서 출력할 경우 `printXxxTable(List<Order>)` private 헬퍼로 추출하여 중복 제거 (`ApprovalMenuHandler.printOrderTable()`, `ReleaseMenuHandler.printConfirmedTable()` 참고)
 
 ---
 
@@ -145,6 +146,7 @@ CONFIRMED → RELEASE   (출고 처리)
 - 콘솔 I/O는 별도 클래스로 분리 (테스트 용이성)
 - 주석은 WHY가 비명백한 경우에만 한 줄로 작성
 - **테스트 메서드명은 영어로 작성** — 한글 포함 금지; `method_condition_expectedResult` 패턴 사용
+- Repository의 반복적인 순회+필터 패턴은 `filter(Predicate<T>)` private 헬퍼로 추출 (`SampleRepository.filter()` 참고)
 
 ---
 

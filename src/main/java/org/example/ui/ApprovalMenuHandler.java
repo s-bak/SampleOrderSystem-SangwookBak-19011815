@@ -54,15 +54,7 @@ public class ApprovalMenuHandler {
             io.println("대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(APPROVAL_SEP);
-        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println(APPROVAL_SEP);
-        for (Order o : list) {
-            io.println(String.format(APPROVAL_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
-                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
-            io.println(APPROVAL_SEP);
-        }
+        printOrderTable(list);
     }
 
     private void listRejected() {
@@ -71,15 +63,7 @@ public class ApprovalMenuHandler {
             io.println("거절된 주문이 없습니다.");
             return;
         }
-        io.println(APPROVAL_SEP);
-        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println(APPROVAL_SEP);
-        for (Order o : list) {
-            io.println(String.format(APPROVAL_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
-                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
-            io.println(APPROVAL_SEP);
-        }
+        printOrderTable(list);
     }
 
     private void approve() {
@@ -88,15 +72,7 @@ public class ApprovalMenuHandler {
             io.println("[오류] 대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(APPROVAL_SEP);
-        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println(APPROVAL_SEP);
-        for (Order o : reserved) {
-            io.println(String.format(APPROVAL_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
-                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
-            io.println(APPROVAL_SEP);
-        }
+        printOrderTable(reserved);
         io.print("승인할 주문 ID: ");
         String orderId = io.readLine();
         if (orderId.isEmpty()) {
@@ -118,15 +94,7 @@ public class ApprovalMenuHandler {
             io.println("[오류] 대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(APPROVAL_SEP);
-        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
-        io.println(APPROVAL_SEP);
-        for (Order o : reserved) {
-            io.println(String.format(APPROVAL_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
-                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
-            io.println(APPROVAL_SEP);
-        }
+        printOrderTable(reserved);
         io.print("거절할 주문 ID: ");
         String orderId = io.readLine();
         if (orderId.isEmpty()) {
@@ -139,6 +107,18 @@ public class ApprovalMenuHandler {
             io.println("거절 완료: [" + orderId + "]");
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());
+        }
+    }
+
+    private void printOrderTable(List<Order> orders) {
+        io.println(APPROVAL_SEP);
+        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println(APPROVAL_SEP);
+        for (Order o : orders) {
+            io.println(String.format(APPROVAL_ROW_FMT,
+                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
+                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+            io.println(APPROVAL_SEP);
         }
     }
 }

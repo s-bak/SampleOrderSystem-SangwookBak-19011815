@@ -180,3 +180,11 @@ src/main/java/org/example/
 | 잘못된 수율·생산시간 입력 | 오류 메시지 출력 후 중단 |
 | 존재하지 않는 ID 참조 | 오류 메시지 출력 |
 | 목록이 비어 있을 때 | 안내 메시지 출력 후 메뉴 복귀 |
+
+---
+
+## 변경 이력
+
+| 버전 | 내용 |
+|---|---|
+| Phase 9-32 | 중복 코드 정리: `ApprovalMenuHandler.printOrderTable()`, `ReleaseMenuHandler.printConfirmedTable()`, `SampleRepository.filter()` 헬퍼 추출 |

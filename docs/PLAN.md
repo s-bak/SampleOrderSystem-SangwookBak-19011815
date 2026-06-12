@@ -590,6 +590,20 @@
 
 ---
 
+### Phase 9-32 — 중복 코드 정리 (Clean Code Refactoring)
+
+**목표:** 동작 변경 없이 클래스 내·간 중복 코드를 private 헬퍼로 추출하여 유지보수성을 높인다.
+
+**작업 목록**
+- `ApprovalMenuHandler`: `listReserved()`, `listRejected()`, `approve()`, `reject()` 4곳에 복사된 테이블 출력 블록 → `printOrderTable(List<Order>)` private 헬퍼로 추출
+- `ReleaseMenuHandler`: `listConfirmed()`, `release()` 2곳에 복사된 테이블 출력 블록 → `printConfirmedTable(List<Order>)` private 헬퍼로 추출
+- `SampleRepository`: `findByNameContaining`, `findByIdContaining`, `findByAvgProductionTime`, `findByYield` 4개 메서드의 동일한 순회+필터 구조 → `filter(Predicate<Sample>)` private 헬퍼로 추출; `java.util.function.Predicate` import 추가
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL (227개)
+
+---
+
 ### Phase 9-31 — UI 레이어 테스트 커버리지 100% 달성
 
 **목표:** repository·service 레이어에 이어 UI 레이어도 100% 라인/분기 커버리지를 달성한다.
@@ -710,4 +724,5 @@
 | 9-29 | Corner Case 단위 테스트 보강 | 90 → 157개; `ProductionQueueTest` 신규, 각 레이어 경계 조건 추가 |
 | 9-30 | 테스트 메서드명 영어화 | `MonitoringServiceTest` 한글 메서드명 5개 → 영어 변환 |
 | 9-31 | UI 레이어 테스트 커버리지 100% | dead code 제거(isBlank 루프), UI 핸들러 전체 +35개 → 227개 |
+| 9-32 | 중복 코드 정리 | `printOrderTable()`, `printConfirmedTable()`, `SampleRepository.filter()` 헬퍼 추출 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

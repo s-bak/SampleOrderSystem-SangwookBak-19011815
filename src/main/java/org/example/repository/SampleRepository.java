@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class SampleRepository {
 
@@ -28,39 +29,25 @@ public class SampleRepository {
     }
 
     public List<Sample> findByNameContaining(String keyword) {
-        List<Sample> result = new ArrayList<>();
-        for (Sample sample : store.values()) {
-            if (sample.getName().contains(keyword)) {
-                result.add(sample);
-            }
-        }
-        return result;
+        return filter(s -> s.getName().contains(keyword));
     }
 
     public List<Sample> findByIdContaining(String keyword) {
-        List<Sample> result = new ArrayList<>();
-        for (Sample sample : store.values()) {
-            if (sample.getId().contains(keyword)) {
-                result.add(sample);
-            }
-        }
-        return result;
+        return filter(s -> s.getId().contains(keyword));
     }
 
     public List<Sample> findByAvgProductionTime(double time) {
-        List<Sample> result = new ArrayList<>();
-        for (Sample sample : store.values()) {
-            if (Double.compare(sample.getAvgProductionTime(), time) == 0) {
-                result.add(sample);
-            }
-        }
-        return result;
+        return filter(s -> Double.compare(s.getAvgProductionTime(), time) == 0);
     }
 
     public List<Sample> findByYield(double yield) {
+        return filter(s -> Double.compare(s.getYield(), yield) == 0);
+    }
+
+    private List<Sample> filter(Predicate<Sample> predicate) {
         List<Sample> result = new ArrayList<>();
         for (Sample sample : store.values()) {
-            if (Double.compare(sample.getYield(), yield) == 0) {
+            if (predicate.test(sample)) {
                 result.add(sample);
             }
         }

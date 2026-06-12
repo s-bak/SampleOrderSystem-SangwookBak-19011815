@@ -50,14 +50,7 @@ public class ReleaseMenuHandler {
             io.println("출고 대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(RELEASE_SEP);
-        io.println(String.format(RELEASE_HEADER_FMT, "주문ID", "고객명", "시료명", "수량"));
-        io.println(RELEASE_SEP);
-        for (Order o : list) {
-            io.println(String.format(RELEASE_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(), o.getQuantity()));
-            io.println(RELEASE_SEP);
-        }
+        printConfirmedTable(list);
     }
 
     private void release() {
@@ -66,14 +59,7 @@ public class ReleaseMenuHandler {
             io.println("[오류] 출고 대기 중인 주문이 없습니다.");
             return;
         }
-        io.println(RELEASE_SEP);
-        io.println(String.format(RELEASE_HEADER_FMT, "주문ID", "고객명", "시료명", "수량"));
-        io.println(RELEASE_SEP);
-        for (Order o : confirmed) {
-            io.println(String.format(RELEASE_ROW_FMT,
-                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(), o.getQuantity()));
-            io.println(RELEASE_SEP);
-        }
+        printConfirmedTable(confirmed);
         io.print("출고할 주문 ID: ");
         String orderId = io.readLine();
         if (orderId.isEmpty()) {
@@ -86,6 +72,17 @@ public class ReleaseMenuHandler {
             io.println("출고 완료: [" + orderId + "]");
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());
+        }
+    }
+
+    private void printConfirmedTable(List<Order> orders) {
+        io.println(RELEASE_SEP);
+        io.println(String.format(RELEASE_HEADER_FMT, "주문ID", "고객명", "시료명", "수량"));
+        io.println(RELEASE_SEP);
+        for (Order o : orders) {
+            io.println(String.format(RELEASE_ROW_FMT,
+                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(), o.getQuantity()));
+            io.println(RELEASE_SEP);
         }
     }
 }
