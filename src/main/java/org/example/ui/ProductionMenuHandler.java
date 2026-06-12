@@ -54,9 +54,9 @@ public class ProductionMenuHandler {
         ProductionJob job = currentOpt.get();
         double progressPct = calcProgress(job);
 
-        io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %8s %12s %8s",
-                "주문번호", "시료명", "시료ID", "주문량", "재고수량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
-        io.println("-".repeat(92));
+        io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %12s %8s",
+                "주문번호", "시료명", "시료ID", "주문량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
+        io.println("-".repeat(83));
         printCurrentJobRow(job, progressPct);
 
         if (progressPct >= 100.0) {
@@ -77,13 +77,11 @@ public class ProductionMenuHandler {
 
     private void printCurrentJobRow(ProductionJob job, double progressPct) {
         var order = job.getOrder();
-        var sample = order.getSample();
-        io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
+        io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
-                sample.getName(),
-                sample.getId(),
+                order.getSample().getName(),
+                order.getSample().getId(),
                 order.getQuantity(),
-                sample.getStock(),
                 job.getShortfall(),
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
