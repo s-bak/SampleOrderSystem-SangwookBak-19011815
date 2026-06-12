@@ -36,6 +36,21 @@ public class Order {
         this.createdAt = LocalDateTime.now();
     }
 
+    private Order(String orderId, String customerName, Sample sample, int quantity,
+                  OrderStatus status, LocalDateTime createdAt) {
+        this.orderId = orderId;
+        this.customerName = customerName;
+        this.sample = sample;
+        this.quantity = quantity;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+
+    public static Order restore(String orderId, String customerName, Sample sample, int quantity,
+                                OrderStatus status, LocalDateTime createdAt) {
+        return new Order(orderId, customerName, sample, quantity, status, createdAt);
+    }
+
     public void transitionTo(OrderStatus next) {
         if (!ALLOWED_TRANSITIONS.get(status).contains(next)) {
             throw new InvalidOrderStateTransitionException(

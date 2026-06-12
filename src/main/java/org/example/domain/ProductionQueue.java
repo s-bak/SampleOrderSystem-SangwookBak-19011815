@@ -47,4 +47,12 @@ public class ProductionQueue {
     public int size() {
         return queue.size();
     }
+
+    public void enqueueJob(ProductionJob job) {
+        queue.add(job);
+    }
+
+    public List<ProductionJob> getAll() {
+        return new ArrayList<>(queue);
+    }
 }

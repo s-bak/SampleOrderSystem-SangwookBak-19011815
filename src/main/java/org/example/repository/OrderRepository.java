@@ -43,4 +43,12 @@ public class OrderRepository {
     public String generateNextId() {
         return String.format("O-%03d", sequence + 1);
     }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
 }

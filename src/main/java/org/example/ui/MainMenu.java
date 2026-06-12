@@ -8,6 +8,7 @@ import org.example.service.ProductionService;
 import org.example.service.ReleaseService;
 import org.example.service.SampleService;
 import org.example.domain.ProductionQueue;
+import org.example.repository.JsonDataStore;
 import org.example.repository.OrderRepository;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class MainMenu {
     private final ReleaseMenuHandler releaseHandler;
     private final ProductionMenuHandler productionHandler;
     private final SampleService sampleService;
+    private final JsonDataStore dataStore;
 
     public MainMenu(ConsoleIO io,
                     SampleService sampleService,
@@ -31,7 +33,8 @@ public class MainMenu {
                     ReleaseService releaseService,
                     MonitoringService monitoringService,
                     ProductionQueue productionQueue,
-                    OrderRepository orderRepository) {
+                    OrderRepository orderRepository,
+                    JsonDataStore dataStore) {
         this.io = io;
         this.sampleService = sampleService;
         this.sampleHandler = new SampleMenuHandler(io, sampleService);
@@ -40,6 +43,7 @@ public class MainMenu {
         this.monitoringHandler = new MonitoringMenuHandler(io, monitoringService);
         this.releaseHandler = new ReleaseMenuHandler(io, releaseService, orderRepository);
         this.productionHandler = new ProductionMenuHandler(io, productionService, productionQueue);
+        this.dataStore = dataStore;
     }
 
     public void run() {
@@ -49,12 +53,12 @@ public class MainMenu {
             String input = io.readLine();
 
             switch (input) {
-                case "1" -> sampleHandler.handle();
-                case "2" -> orderHandler.handle();
-                case "3" -> approvalHandler.handle();
+                case "1" -> { sampleHandler.handle();    dataStore.save(); }
+                case "2" -> { orderHandler.handle();     dataStore.save(); }
+                case "3" -> { approvalHandler.handle();  dataStore.save(); }
                 case "4" -> monitoringHandler.handle();
-                case "5" -> releaseHandler.handle();
-                case "6" -> productionHandler.handle();
+                case "5" -> { releaseHandler.handle();   dataStore.save(); }
+                case "6" -> { productionHandler.handle(); dataStore.save(); }
                 case "0" -> {
                     io.println("시스템을 종료합니다.");
                     return;
