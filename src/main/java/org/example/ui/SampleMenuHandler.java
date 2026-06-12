@@ -136,35 +136,13 @@ public class SampleMenuHandler {
 
     private void printHeader() {
         printSeparator();
-        io.println("| " + padRight("시료ID", 6) +
-                   " | " + padRight("시료명", 15) +
-                   " | " + padLeft("생산시간(min)", 13) +
-                   " | " + padLeft("수율", 6) +
-                   " | " + padLeft("재고", 6) + " |");
+        io.println(String.format("| %-6s | %-15s | %13s | %6s | %6s |",
+                "시료ID", "시료명", "생산시간(min)", "수율", "재고"));
         printSeparator();
     }
 
     private void printRow(Sample s) {
         io.println(String.format("| %-6s | %-15s | %13.1f | %6.2f | %6d |",
                 s.getId(), s.getName(), s.getAvgProductionTime(), s.getYield(), s.getStock()));
-    }
-
-    // 한글은 시각적 폭 2, ASCII는 1로 계산
-    private static int visualWidth(String s) {
-        int w = 0;
-        for (char c : s.toCharArray()) {
-            w += (c >= 0xAC00 && c <= 0xD7A3) || (c >= 0x1100 && c <= 0x11FF) ? 2 : 1;
-        }
-        return w;
-    }
-
-    private static String padRight(String s, int targetVisual) {
-        int pad = targetVisual - visualWidth(s);
-        return pad > 0 ? s + " ".repeat(pad) : s;
-    }
-
-    private static String padLeft(String s, int targetVisual) {
-        int pad = targetVisual - visualWidth(s);
-        return pad > 0 ? " ".repeat(pad) + s : s;
     }
 }
