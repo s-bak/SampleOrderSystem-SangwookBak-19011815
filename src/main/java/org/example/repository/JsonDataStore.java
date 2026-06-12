@@ -104,7 +104,7 @@ public class JsonDataStore {
             for (ProductionJob job : productionQueue.getAll()) {
                 QueueItemDto dto = new QueueItemDto();
                 dto.orderId = job.getOrder().getOrderId();
-                dto.shortfall = job.getOrder().getQuantity() - job.getOrder().getSample().getStock();
+                dto.shortfall = job.getShortfall();
                 dto.enqueuedAt = job.getEnqueuedAt().toString();
                 dto.startedAt = job.getStartedAt() != null ? job.getStartedAt().toString() : null;
                 snapshot.productionQueue.add(dto);

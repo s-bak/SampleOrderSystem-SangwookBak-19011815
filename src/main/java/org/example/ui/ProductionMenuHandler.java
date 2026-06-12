@@ -78,14 +78,13 @@ public class ProductionMenuHandler {
     private void printCurrentJobRow(ProductionJob job, double progressPct) {
         var order = job.getOrder();
         var sample = order.getSample();
-        int shortfall = order.getQuantity() - sample.getStock();
         io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
                 sample.getName(),
                 sample.getId(),
                 order.getQuantity(),
                 sample.getStock(),
-                shortfall,
+                job.getShortfall(),
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
                 progressPct));
