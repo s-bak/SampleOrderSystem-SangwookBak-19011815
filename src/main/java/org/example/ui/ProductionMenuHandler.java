@@ -7,6 +7,7 @@ import org.example.service.ProductionService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,9 +45,11 @@ public class ProductionMenuHandler {
         }
     }
 
+    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("MM/dd HH:mm");
+
     private void showCurrent() {
         Optional<ProductionJob> currentOpt = productionQueue.peek();
-        if (currentOpt.isEmpty()) {
+        if (currentOpt.isEmpty() || !currentOpt.get().isActive()) {
             io.println("생산 중인 작업이 없습니다.");
             return;
         }
@@ -96,8 +99,8 @@ public class ProductionMenuHandler {
             io.println("대기 중인 작업이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %8s %14s", "주문ID", "시료명", "실생산수", "예상총생산시간(min)"));
-        io.println("-".repeat(50));
+        io.println(String.format("%-8s %-15s %8s %14s %16s", "주문ID", "시료명", "실생산수", "예상총생산시간(min)", "접수시각"));
+        io.println("-".repeat(67));
         waiting.forEach(this::printJobRow);
     }
 
@@ -114,10 +117,11 @@ public class ProductionMenuHandler {
     }
 
     private void printJobRow(ProductionJob job) {
-        io.println(String.format("%-8s %-15s %8d %14.1f",
+        io.println(String.format("%-8s %-15s %8d %14.1f %16s",
                 job.getOrder().getOrderId(),
                 job.getOrder().getSample().getName(),
                 job.getActualProductionCount(),
-                job.getTotalProductionTime()));
+                job.getTotalProductionTime(),
+                job.getEnqueuedAt().format(DT_FMT)));
     }
 }

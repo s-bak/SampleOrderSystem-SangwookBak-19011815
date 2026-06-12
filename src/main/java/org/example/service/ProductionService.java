@@ -23,6 +23,7 @@ public class ProductionService {
         productionQueue.remove(orderId);
         order.getSample().increaseStock(job.getActualProductionCount());
         order.transitionTo(OrderStatus.CONFIRMED);
+        productionQueue.startNext();
         return order;
     }
 }

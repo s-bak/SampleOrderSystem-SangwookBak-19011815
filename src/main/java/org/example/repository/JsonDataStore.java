@@ -60,9 +60,14 @@ public class JsonDataStore {
             for (QueueItemDto dto : snapshot.productionQueue) {
                 Order order = orderRepository.findById(dto.orderId)
                         .orElseThrow(() -> new IllegalStateException("DB 오류: 주문을 찾을 수 없습니다. id=" + dto.orderId));
-                LocalDateTime startedAt = dto.startedAt != null
-                        ? LocalDateTime.parse(dto.startedAt) : LocalDateTime.now();
-                productionQueue.enqueueJob(new ProductionJob(order, dto.shortfall, startedAt));
+                // 구 DB(enqueuedAt 없음): startedAt을 enqueuedAt으로 사용하고 활성 상태로 복원
+                LocalDateTime enqueuedAt = dto.enqueuedAt != null
+                        ? LocalDateTime.parse(dto.enqueuedAt)
+                        : (dto.startedAt != null ? LocalDateTime.parse(dto.startedAt) : LocalDateTime.now());
+                LocalDateTime startedAt = dto.enqueuedAt != null && dto.startedAt != null
+                        ? LocalDateTime.parse(dto.startedAt)
+                        : enqueuedAt; // 구 DB는 항상 활성 상태로 간주
+                productionQueue.enqueueJob(ProductionJob.restore(order, dto.shortfall, enqueuedAt, startedAt));
             }
         } catch (IOException e) {
             throw new UncheckedIOException("DB 로드 실패: " + dbPath, e);
@@ -100,7 +105,8 @@ public class JsonDataStore {
                 QueueItemDto dto = new QueueItemDto();
                 dto.orderId = job.getOrder().getOrderId();
                 dto.shortfall = job.getOrder().getQuantity() - job.getOrder().getSample().getStock();
-                dto.startedAt = job.getStartedAt().toString();
+                dto.enqueuedAt = job.getEnqueuedAt().toString();
+                dto.startedAt = job.getStartedAt() != null ? job.getStartedAt().toString() : null;
                 snapshot.productionQueue.add(dto);
             }
 
@@ -134,6 +140,7 @@ public class JsonDataStore {
     public static class QueueItemDto {
         public String orderId;
         public int shortfall;
-        public String startedAt;
+        public String enqueuedAt;
+        public String startedAt; // null이면 대기 중
     }
 }

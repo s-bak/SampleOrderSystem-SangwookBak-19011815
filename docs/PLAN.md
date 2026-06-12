@@ -382,6 +382,33 @@
 
 ---
 
+### Phase 9-17 — 생산 큐 순차 처리 (enqueuedAt / startedAt 분리)
+
+**목표:** 한 번에 한 작업만 생산하고, 큐에 삽입된 시각(`enqueuedAt`)과 실제 생산 시작 시각(`startedAt`)을 구분하여 FIFO 순차 처리를 보장한다.
+
+**작업 목록**
+- `ProductionJob`
+  - `enqueuedAt(LocalDateTime)`: 큐 삽입 시각 (승인 시점), 항상 설정
+  - `startedAt(LocalDateTime, nullable)`: 실제 생산 시작 시각; `null`이면 대기 중
+  - `start()`: 대기 → 생산 중 전환 (`startedAt = now()`)
+  - `isActive()`: `startedAt != null`
+  - `restore(order, shortfall, enqueuedAt, startedAt)` 정적 팩터리 (JSON 복원용)
+- `ProductionQueue`
+  - `enqueue()`: `enqueuedAt=now()` 기록, 큐가 비어 있으면 즉시 `job.start()`, 아니면 `startedAt=null`로 대기
+  - `startNext()`: 헤드 제거 후 다음 대기 작업에 `start()` 호출
+- `ProductionService.complete()`: 기존 완료 처리 후 `productionQueue.startNext()` 호출
+- `JsonDataStore`
+  - `QueueItemDto`에 `enqueuedAt`, `startedAt`(nullable) 추가
+  - 구 DB 호환: `enqueuedAt` 없으면 기존 `startedAt`을 `enqueuedAt`으로 사용하고 활성 상태로 복원
+- `ProductionMenuHandler`
+  - `showCurrent()`: `isActive()` 검사 추가 — 비활성 헤드면 "생산 중인 작업이 없습니다" 출력
+  - `showWaiting()`: 접수시각(`enqueuedAt`) 컬럼 추가 (`MM/dd HH:mm` 형식)
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -429,4 +456,5 @@
 | 9-13 | 모니터링 주문량 시료 ID 표시 | `showOrdersByStatus()` 시료명 옆 `(S-XXX)` 추가 |
 | 9-15 | 생산 현황 상세 출력 + 진행률 | `ProductionJob.startedAt` 승인 시점 기록, 현황 9컬럼 출력, 진행률(%) 실시간 계산 |
 | 9-16 | 진행률 정밀 계산 + 재고 자동 완료 | 밀리초 기반 진행률 수정, 100% 도달 시 생산 자동 완료·재고 즉시 반영 |
+| 9-17 | 생산 큐 순차 처리 | `enqueuedAt`/`startedAt` 분리, 빈 큐 즉시 시작, 대기 후 순차 처리, `startNext()` |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

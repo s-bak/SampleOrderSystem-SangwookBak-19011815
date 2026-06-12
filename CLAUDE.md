@@ -25,8 +25,8 @@ Java 17+ / Gradle / JUnit 5 기반 콘솔 애플리케이션.
 |---|---|
 | `Sample` | 시료. ID(`S-XXX`), 시료명, 평균 생산시간(`double`, 0 초과), 수율(0 < yield ≤ 1), 재고 수량 |
 | `Order` | 주문. 주문 ID, 고객명, 시료 참조, 주문 수량, 상태 |
-| `ProductionJob` | 생산 작업. Order, 실생산량, 소요시간, 승인 시점(`startedAt`) 보유 |
-| `ProductionQueue` | 생산 라인. FIFO 큐로 작업을 순차 처리; `enqueue()` 시 `LocalDateTime.now()`를 `startedAt`으로 기록 |
+| `ProductionJob` | 생산 작업. Order, 실생산량, 소요시간, 접수시각(`enqueuedAt`), 생산시작시각(`startedAt`, null=대기 중) 보유 |
+| `ProductionQueue` | 생산 라인. FIFO 큐; 빈 큐 삽입 시 즉시 `start()`, 선행 작업 있으면 대기; 완료 시 `startNext()`로 순차 시작 |
 
 ### 주문 상태 (`OrderStatus`)
 
