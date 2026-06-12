@@ -68,14 +68,15 @@ public class OrderMenuHandler {
     }
 
     private void printHeader() {
-        io.println(String.format("%-8s %-10s %-15s %6s %-12s %s",
-                "주문ID", "고객명", "시료명", "수량", "상태", "등록일시"));
-        io.println("-".repeat(72));
+        io.println(String.format("%-8s %-10s %-22s %6s %-12s %s",
+                "주문ID", "고객명", "시료명 (ID)", "수량", "상태", "등록일시"));
+        io.println("-".repeat(79));
     }
 
     private void printRow(Order o) {
-        io.println(String.format("%-8s %-10s %-15s %6d %-12s %s",
-                o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
+        String sampleCell = o.getSample().getName() + " (" + o.getSample().getId() + ")";
+        io.println(String.format("%-8s %-10s %-22s %6d %-12s %s",
+                o.getOrderId(), o.getCustomerName(), sampleCell,
                 o.getQuantity(), o.getStatus(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
     }
 }
