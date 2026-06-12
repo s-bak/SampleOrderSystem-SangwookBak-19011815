@@ -66,7 +66,7 @@ public class ProductionMenuHandler {
                 order.getSample().getName(),
                 order.getSample().getId(),
                 order.getQuantity(),
-                job.getShortfall(),
+                job.getRemainingShortfall(),
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
                 progressPct));

@@ -10,6 +10,7 @@ public class ProductionJob {
     private final double totalProductionTime;
     private final LocalDateTime enqueuedAt;
     private LocalDateTime startedAt; // null이면 대기 중, non-null이면 생산 중
+    private int stockAdded = 0;      // 지금까지 재고에 추가된 수량
 
     public ProductionJob(Order order, int shortfall, LocalDateTime enqueuedAt) {
         if (shortfall < 1) {
@@ -24,9 +25,11 @@ public class ProductionJob {
     }
 
     public static ProductionJob restore(Order order, int shortfall,
-                                        LocalDateTime enqueuedAt, LocalDateTime startedAt) {
+                                        LocalDateTime enqueuedAt, LocalDateTime startedAt,
+                                        int stockAdded) {
         ProductionJob job = new ProductionJob(order, shortfall, enqueuedAt);
         job.startedAt = startedAt;
+        job.stockAdded = stockAdded;
         return job;
     }
 
@@ -38,6 +41,10 @@ public class ProductionJob {
     public boolean isActive() {
         return startedAt != null;
     }
+
+    public void addStock(int amount) { this.stockAdded += amount; }
+    public int getStockAdded() { return stockAdded; }
+    public int getRemainingShortfall() { return shortfall - stockAdded; }
 
     public Order getOrder() { return order; }
     public int getShortfall() { return shortfall; }

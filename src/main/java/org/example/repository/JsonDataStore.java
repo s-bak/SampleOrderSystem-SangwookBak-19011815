@@ -67,7 +67,7 @@ public class JsonDataStore {
                 LocalDateTime startedAt = dto.enqueuedAt != null && dto.startedAt != null
                         ? LocalDateTime.parse(dto.startedAt)
                         : enqueuedAt; // 구 DB는 항상 활성 상태로 간주
-                productionQueue.enqueueJob(ProductionJob.restore(order, dto.shortfall, enqueuedAt, startedAt));
+                productionQueue.enqueueJob(ProductionJob.restore(order, dto.shortfall, enqueuedAt, startedAt, dto.stockAdded));
             }
         } catch (IOException e) {
             throw new UncheckedIOException("DB 로드 실패: " + dbPath, e);
@@ -105,6 +105,7 @@ public class JsonDataStore {
                 QueueItemDto dto = new QueueItemDto();
                 dto.orderId = job.getOrder().getOrderId();
                 dto.shortfall = job.getShortfall();
+                dto.stockAdded = job.getStockAdded();
                 dto.enqueuedAt = job.getEnqueuedAt().toString();
                 dto.startedAt = job.getStartedAt() != null ? job.getStartedAt().toString() : null;
                 snapshot.productionQueue.add(dto);
@@ -140,6 +141,7 @@ public class JsonDataStore {
     public static class QueueItemDto {
         public String orderId;
         public int shortfall;
+        public int stockAdded;
         public String enqueuedAt;
         public String startedAt; // null이면 대기 중
     }

@@ -45,9 +45,19 @@ public class ProductionScheduler {
 
         ProductionJob job = current.get();
         double elapsedMs = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMillis();
-        double progress = Math.min(100.0, elapsedMs / (job.getTotalProductionTime() * 60_000) * 100.0);
 
-        if (progress >= 100.0) {
+        // 단위당 생산 시간(ms) = 총 생산시간 / 재고에 추가할 수량(shortfall)
+        double msPerUnit = job.getTotalProductionTime() * 60_000.0 / job.getShortfall();
+        int expectedUnits = (int) Math.min(job.getShortfall(), elapsedMs / msPerUnit);
+        int newUnits = expectedUnits - job.getStockAdded();
+
+        if (newUnits > 0) {
+            job.getOrder().getSample().increaseStock(newUnits);
+            job.addStock(newUnits);
+            dataStore.save();
+        }
+
+        if (job.getStockAdded() >= job.getShortfall()) {
             try {
                 productionService.complete(job.getOrder().getOrderId());
                 dataStore.save();

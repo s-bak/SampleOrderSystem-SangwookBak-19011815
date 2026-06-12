@@ -45,12 +45,12 @@ class ProductionServiceTest {
     }
 
     @Test
-    void complete_stockIncreased() {
-        // stock=2, quantity=10, shortfall=8
-        // 완료 후 stock = 2(기존) + 8(부족분) = 10 — 주문 수량을 정확히 충족
+    void complete_stockNotChangedByComplete() {
+        // 재고 추가는 ProductionScheduler가 단위별로 처리 — complete()는 재고 변경 없음
         Order order = producingOrder(2, 10);
+        int stockBefore = order.getSample().getStock();
         productionService.complete(order.getOrderId());
-        assertEquals(10, order.getSample().getStock());
+        assertEquals(stockBefore, order.getSample().getStock());
     }
 
     @Test

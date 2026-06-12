@@ -21,7 +21,6 @@ public class ProductionService {
                 .orElseThrow(() -> new IllegalArgumentException("생산 큐에 존재하지 않는 주문 ID입니다: " + orderId));
         Order order = job.getOrder();
         productionQueue.remove(orderId);
-        order.getSample().increaseStock(job.getShortfall());
         order.transitionTo(OrderStatus.CONFIRMED);
         productionQueue.startNext();
         return order;
