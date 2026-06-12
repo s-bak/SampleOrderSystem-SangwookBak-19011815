@@ -125,4 +125,21 @@ class SampleServiceTest {
         service.register("S-001", "AlphaChip", 30.0, 0.85, 0);
         assertTrue(service.searchByYield(0.5).isEmpty());
     }
+
+    @Test
+    void existsById_true() {
+        service.register("S-001", "AlphaChip", 30.0, 0.85, 0);
+        assertTrue(service.existsById("S-001"));
+    }
+
+    @Test
+    void existsById_false() {
+        assertFalse(service.existsById("S-999"));
+    }
+
+    @Test
+    void searchByAvgProductionTime_noMatch() {
+        service.register("S-001", "AlphaChip", 10.5, 0.85, 0);
+        assertTrue(service.searchByAvgProductionTime(99.9).isEmpty());
+    }
 }

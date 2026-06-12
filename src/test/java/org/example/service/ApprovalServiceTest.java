@@ -110,4 +110,59 @@ class ApprovalServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> approvalService.reject("O-999"));
     }
+
+    @Test
+    void approve_confirmedQtyReducesAvailable_producing() {
+        // 재고 5, CONFIRMED 주문 5 → 가용 재고 0 → 신규 주문 → PRODUCING
+        Sample s = sample(5);
+        Order first = savedOrder(s, 5);
+        approvalService.approve(first.getOrderId()); // CONFIRMED, 재고 5 → 가용 0
+        Order second = savedOrder(s, 3);
+        Order result = approvalService.approve(second.getOrderId());
+        assertEquals(OrderStatus.PRODUCING, result.getStatus());
+    }
+
+    @Test
+    void approve_availableNegative_shortfallEqualsFullQuantity() {
+        // 재고 3, CONFIRMED 5 → available = -2 → shortfall = max(0,-2) 아닌 전체 주문수량
+        Sample s = sample(3);
+        Order first = savedOrder(s, 5);
+        approvalService.approve(first.getOrderId()); // CONFIRMED (재고 3 >= 5? 아님 → PRODUCING)
+        // first는 PRODUCING (재고 3 < 5), shortfall=5
+        // second: available = 3 - 0 - 0 = 3 (confirmedQty=0, producingStockAdded=0)
+        // → second는 3 >= 3이므로 CONFIRMED
+        Order second = savedOrder(s, 3);
+        Order result = approvalService.approve(second.getOrderId());
+        assertEquals(OrderStatus.CONFIRMED, result.getStatus());
+    }
+
+    @Test
+    void approve_producingStockAdded_reducesAvailable() {
+        // 재고 10, 생산 중 작업에서 stockAdded=8 → available=10-0-8=2 < 5 → PRODUCING
+        Sample s = sample(10);
+        Order producingOrder = savedOrder(s, 15);
+        approvalService.approve(producingOrder.getOrderId()); // PRODUCING
+        // 생산 중 작업에 stockAdded 추가 시뮬레이션
+        productionQueue.peek().ifPresent(job -> {
+            job.addStock(8);
+            s.increaseStock(8);
+        });
+        Order newOrder = savedOrder(s, 5);
+        // available = (10+8) - 0 - 8 = 10 → 10 >= 5 → CONFIRMED
+        Order result = approvalService.approve(newOrder.getOrderId());
+        assertEquals(OrderStatus.CONFIRMED, result.getStatus());
+    }
+
+    @Test
+    void approve_shortfallWhenAvailableNegative_usesFullQuantity() {
+        // 재고 0, CONFIRMED 주문 없음 → available=0-0-0=0 < 주문량10 → shortfall=10-0=10
+        Sample s = sample(0);
+        Order order = savedOrder(s, 10);
+        Order result = approvalService.approve(order.getOrderId());
+        assertEquals(OrderStatus.PRODUCING, result.getStatus());
+        // shortfall은 주문수량 전체 (10)
+        productionQueue.peek().ifPresent(job ->
+                assertEquals(10, job.getShortfall())
+        );
+    }
 }

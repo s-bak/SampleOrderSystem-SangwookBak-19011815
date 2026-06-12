@@ -80,4 +80,23 @@ class ProductionServiceTest {
         assertEquals(1, productionQueue.size());
         assertTrue(productionQueue.contains(second.getOrderId()));
     }
+
+    @Test
+    void complete_activatesNextJobInQueue() {
+        // 첫 번째 완료 후 두 번째 작업이 active 상태로 전환되어야 함
+        Order first = producingOrder(0, 5);
+        Sample s2 = new Sample("S-002", "BetaChip", 20, 0.9, 0);
+        sampleRepository.save(s2);
+        Order second = new Order(orderRepository.generateNextId(), "고객B", s2, 3);
+        orderRepository.save(second);
+        approvalService.approve(second.getOrderId());
+
+        // 두 번째 작업은 대기 중
+        assertFalse(productionQueue.getWaiting().get(0).isActive());
+
+        productionService.complete(first.getOrderId());
+
+        // 완료 후 두 번째 작업이 활성화
+        assertTrue(productionQueue.peek().get().isActive());
+    }
 }

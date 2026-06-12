@@ -4,6 +4,8 @@ import org.example.exception.InvalidOrderStateTransitionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
@@ -109,5 +111,41 @@ class OrderTest {
         order.transitionTo(OrderStatus.PRODUCING);
         assertThrows(InvalidOrderStateTransitionException.class,
                 () -> order.transitionTo(OrderStatus.REJECTED));
+    }
+
+    @Test
+    void transition_confirmed_to_producing_throws() {
+        Order order = createOrder();
+        order.transitionTo(OrderStatus.CONFIRMED);
+        assertThrows(InvalidOrderStateTransitionException.class,
+                () -> order.transitionTo(OrderStatus.PRODUCING));
+    }
+
+    @Test
+    void transition_confirmed_to_rejected_throws() {
+        Order order = createOrder();
+        order.transitionTo(OrderStatus.CONFIRMED);
+        assertThrows(InvalidOrderStateTransitionException.class,
+                () -> order.transitionTo(OrderStatus.REJECTED));
+    }
+
+    @Test
+    void transition_reserved_to_self_throws() {
+        Order order = createOrder();
+        assertThrows(InvalidOrderStateTransitionException.class,
+                () -> order.transitionTo(OrderStatus.RESERVED));
+    }
+
+    @Test
+    void restore_createsOrderWithGivenStatus() {
+        LocalDateTime createdAt = LocalDateTime.of(2025, 1, 1, 12, 0);
+        Order restored = Order.restore("O-999", "복원고객", sample, 7,
+                OrderStatus.CONFIRMED, createdAt);
+        assertEquals("O-999", restored.getOrderId());
+        assertEquals("복원고객", restored.getCustomerName());
+        assertEquals(sample, restored.getSample());
+        assertEquals(7, restored.getQuantity());
+        assertEquals(OrderStatus.CONFIRMED, restored.getStatus());
+        assertEquals(createdAt, restored.getCreatedAt());
     }
 }

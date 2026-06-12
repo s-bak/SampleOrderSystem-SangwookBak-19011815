@@ -80,4 +80,36 @@ class OrderRepositoryTest {
         repo.save(order(repo.generateNextId()));
         assertEquals("O-002", repo.generateNextId());
     }
+
+    @Test
+    void save_duplicateId_throws() {
+        repo.save(order("O-001"));
+        assertThrows(IllegalArgumentException.class, () -> repo.save(order("O-001")));
+    }
+
+    @Test
+    void restoreFromDb_storesWithoutIncrementingSequence() {
+        Order o = order("O-005");
+        repo.restoreFromDb(o);
+        assertTrue(repo.findById("O-005").isPresent());
+        // sequence는 증가하지 않아야 함
+        assertEquals(0, repo.getSequence());
+    }
+
+    @Test
+    void getSequence_and_setSequence() {
+        assertEquals(0, repo.getSequence());
+        repo.setSequence(10);
+        assertEquals(10, repo.getSequence());
+        assertEquals("O-011", repo.generateNextId());
+    }
+
+    @Test
+    void restoreFromDb_overwritesExisting() {
+        Order original = order("O-001");
+        repo.restoreFromDb(original);
+        Order replacement = new Order("O-001", "새고객", sample, 3);
+        repo.restoreFromDb(replacement);
+        assertEquals("새고객", repo.findById("O-001").get().getCustomerName());
+    }
 }

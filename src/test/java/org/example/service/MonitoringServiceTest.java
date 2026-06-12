@@ -122,4 +122,72 @@ class MonitoringServiceTest {
         assertEquals("고갈", entries.get(0).getStatus());
         assertEquals(0, entries.get(0).getPendingQuantity());
     }
+
+    @Test
+    void getStockStatus_multipleSamples() {
+        Sample s1 = registerSample("S-001", 10);
+        Sample s2 = registerSample("S-002", 0);
+        placeOrder(s1, 5); // s1 → 부족 (재고>0, 대기>0)
+
+        List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
+        assertEquals(2, entries.size());
+        MonitoringService.StockStatusEntry e1 = entries.stream()
+                .filter(e -> e.getSample().getId().equals("S-001")).findFirst().orElseThrow();
+        MonitoringService.StockStatusEntry e2 = entries.stream()
+                .filter(e -> e.getSample().getId().equals("S-002")).findFirst().orElseThrow();
+        assertEquals("부족", e1.getStatus());
+        assertEquals("고갈", e2.getStatus());
+    }
+
+    @Test
+    void getStockStatus_producingOrderCountsInPending() {
+        Sample s = registerSample("S-001", 3);
+        Order order = placeOrder(s, 5);
+        order.transitionTo(OrderStatus.PRODUCING);
+
+        List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
+        assertEquals("부족", entries.get(0).getStatus());
+        assertEquals(5, entries.get(0).getPendingQuantity());
+    }
+
+    @Test
+    void getStockStatus_releaseOrderNotCounted() {
+        // RELEASE 주문은 pendingQuantity에 포함되지 않음 → 대기 없으면 여유
+        Sample s = registerSample("S-001", 10);
+        Order order = placeOrder(s, 3);
+        order.transitionTo(OrderStatus.CONFIRMED);
+        order.transitionTo(OrderStatus.RELEASE);
+
+        List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
+        assertEquals("여유", entries.get(0).getStatus());
+        assertEquals(0, entries.get(0).getPendingQuantity());
+    }
+
+    @Test
+    void getStockStatus_rejectedOrderNotCounted() {
+        Sample s = registerSample("S-001", 10);
+        Order order = placeOrder(s, 5);
+        order.transitionTo(OrderStatus.REJECTED);
+
+        List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
+        assertEquals("여유", entries.get(0).getStatus());
+        assertEquals(0, entries.get(0).getPendingQuantity());
+    }
+
+    @Test
+    void getStockStatus_noSamples_returnsEmpty() {
+        List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
+        assertTrue(entries.isEmpty());
+    }
+
+    @Test
+    void getOrdersByStatus_includesRelease() {
+        Sample s = registerSample("S-001", 100);
+        Order o = placeOrder(s, 3);
+        o.transitionTo(OrderStatus.CONFIRMED);
+        o.transitionTo(OrderStatus.RELEASE);
+
+        Map<OrderStatus, List<Order>> result = monitoringService.getOrdersByStatus();
+        assertEquals(1, result.get(OrderStatus.RELEASE).size());
+    }
 }

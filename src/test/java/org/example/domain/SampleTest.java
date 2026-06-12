@@ -91,4 +91,23 @@ class SampleTest {
         s.increaseStock(4);
         assertEquals(9, s.getStock());
     }
+
+    @Test
+    void increaseStock_zero_throws() {
+        Sample s = create(0.8, 5);
+        assertThrows(IllegalArgumentException.class, () -> s.increaseStock(0));
+    }
+
+    @Test
+    void increaseStock_negative_throws() {
+        Sample s = create(0.8, 5);
+        assertThrows(IllegalArgumentException.class, () -> s.increaseStock(-1));
+    }
+
+    @Test
+    void decreaseStock_exactAmount_stockBecomesZero() {
+        Sample s = create(0.8, 5);
+        s.decreaseStock(5);
+        assertEquals(0, s.getStock());
+    }
 }
