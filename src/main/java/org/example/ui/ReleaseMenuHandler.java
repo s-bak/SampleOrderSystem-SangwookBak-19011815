@@ -2,6 +2,7 @@ package org.example.ui;
 
 import org.example.domain.Order;
 import org.example.domain.OrderStatus;
+import org.example.repository.JsonDataStore;
 import org.example.repository.OrderRepository;
 import org.example.service.ReleaseService;
 
@@ -12,11 +13,13 @@ public class ReleaseMenuHandler {
     private final ConsoleIO io;
     private final ReleaseService releaseService;
     private final OrderRepository orderRepository;
+    private final JsonDataStore dataStore;
 
-    public ReleaseMenuHandler(ConsoleIO io, ReleaseService releaseService, OrderRepository orderRepository) {
+    public ReleaseMenuHandler(ConsoleIO io, ReleaseService releaseService, OrderRepository orderRepository, JsonDataStore dataStore) {
         this.io = io;
         this.releaseService = releaseService;
         this.orderRepository = orderRepository;
+        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -56,6 +59,7 @@ public class ReleaseMenuHandler {
         String orderId = io.readLine();
         try {
             releaseService.release(orderId);
+            dataStore.save();
             io.println("출고 완료: [" + orderId + "]");
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());

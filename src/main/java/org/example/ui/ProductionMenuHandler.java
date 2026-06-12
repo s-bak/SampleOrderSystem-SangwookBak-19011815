@@ -2,6 +2,7 @@ package org.example.ui;
 
 import org.example.domain.ProductionJob;
 import org.example.domain.ProductionQueue;
+import org.example.repository.JsonDataStore;
 import org.example.service.ProductionService;
 
 import java.util.List;
@@ -12,11 +13,13 @@ public class ProductionMenuHandler {
     private final ConsoleIO io;
     private final ProductionService productionService;
     private final ProductionQueue productionQueue;
+    private final JsonDataStore dataStore;
 
-    public ProductionMenuHandler(ConsoleIO io, ProductionService productionService, ProductionQueue productionQueue) {
+    public ProductionMenuHandler(ConsoleIO io, ProductionService productionService, ProductionQueue productionQueue, JsonDataStore dataStore) {
         this.io = io;
         this.productionService = productionService;
         this.productionQueue = productionQueue;
+        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -45,7 +48,7 @@ public class ProductionMenuHandler {
             io.println("생산 중인 작업이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %8s %12s", "주문ID", "시료명", "실생산량", "총생산시간(min)"));
+        io.println(String.format("%-8s %-15s %8s %12s", "주문ID", "시료명", "실생산수", "총생산시간(min)"));
         io.println("-".repeat(48));
         printJobRow(current.get());
     }
@@ -56,7 +59,7 @@ public class ProductionMenuHandler {
             io.println("대기 중인 작업이 없습니다.");
             return;
         }
-        io.println(String.format("%-8s %-15s %8s %14s", "주문ID", "시료명", "실생산량", "예상생산시간(min)"));
+        io.println(String.format("%-8s %-15s %8s %14s", "주문ID", "시료명", "실생산수", "예상총생산시간(min)"));
         io.println("-".repeat(50));
         waiting.forEach(this::printJobRow);
     }
@@ -66,6 +69,7 @@ public class ProductionMenuHandler {
         String orderId = io.readLine();
         try {
             var order = productionService.complete(orderId);
+            dataStore.save();
             io.println("생산 완료: [" + orderId + "], 재고 " + order.getSample().getStock() + "개");
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());

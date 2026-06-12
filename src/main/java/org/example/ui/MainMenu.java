@@ -37,12 +37,12 @@ public class MainMenu {
                     JsonDataStore dataStore) {
         this.io = io;
         this.sampleService = sampleService;
-        this.sampleHandler = new SampleMenuHandler(io, sampleService);
-        this.orderHandler = new OrderMenuHandler(io, orderService, sampleService);
-        this.approvalHandler = new ApprovalMenuHandler(io, approvalService, orderRepository);
+        this.sampleHandler = new SampleMenuHandler(io, sampleService, dataStore);
+        this.orderHandler = new OrderMenuHandler(io, orderService, sampleService, dataStore);
+        this.approvalHandler = new ApprovalMenuHandler(io, approvalService, orderRepository, dataStore);
         this.monitoringHandler = new MonitoringMenuHandler(io, monitoringService);
-        this.releaseHandler = new ReleaseMenuHandler(io, releaseService, orderRepository);
-        this.productionHandler = new ProductionMenuHandler(io, productionService, productionQueue);
+        this.releaseHandler = new ReleaseMenuHandler(io, releaseService, orderRepository, dataStore);
+        this.productionHandler = new ProductionMenuHandler(io, productionService, productionQueue, dataStore);
         this.dataStore = dataStore;
     }
 
@@ -53,12 +53,12 @@ public class MainMenu {
             String input = io.readLine();
 
             switch (input) {
-                case "1" -> { sampleHandler.handle();    dataStore.save(); }
-                case "2" -> { orderHandler.handle();     dataStore.save(); }
-                case "3" -> { approvalHandler.handle();  dataStore.save(); }
+                case "1" -> sampleHandler.handle();
+                case "2" -> orderHandler.handle();
+                case "3" -> approvalHandler.handle();
                 case "4" -> monitoringHandler.handle();
-                case "5" -> { releaseHandler.handle();   dataStore.save(); }
-                case "6" -> { productionHandler.handle(); dataStore.save(); }
+                case "5" -> releaseHandler.handle();
+                case "6" -> productionHandler.handle();
                 case "0" -> {
                     io.println("시스템을 종료합니다.");
                     return;

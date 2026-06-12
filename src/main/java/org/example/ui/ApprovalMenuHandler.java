@@ -2,6 +2,7 @@ package org.example.ui;
 
 import org.example.domain.Order;
 import org.example.domain.OrderStatus;
+import org.example.repository.JsonDataStore;
 import org.example.repository.OrderRepository;
 import org.example.service.ApprovalService;
 
@@ -12,11 +13,13 @@ public class ApprovalMenuHandler {
     private final ConsoleIO io;
     private final ApprovalService approvalService;
     private final OrderRepository orderRepository;
+    private final JsonDataStore dataStore;
 
-    public ApprovalMenuHandler(ConsoleIO io, ApprovalService approvalService, OrderRepository orderRepository) {
+    public ApprovalMenuHandler(ConsoleIO io, ApprovalService approvalService, OrderRepository orderRepository, JsonDataStore dataStore) {
         this.io = io;
         this.approvalService = approvalService;
         this.orderRepository = orderRepository;
+        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -42,7 +45,7 @@ public class ApprovalMenuHandler {
     private void listReserved() {
         List<Order> list = orderRepository.findByStatus(OrderStatus.RESERVED);
         if (list.isEmpty()) {
-            io.println("처리 대기 중인 주문이 없습니다.");
+            io.println("대기 중인 주문이 없습니다.");
             return;
         }
         io.println(String.format("%-8s %-10s %-15s %6s %s",
@@ -60,6 +63,7 @@ public class ApprovalMenuHandler {
         String orderId = io.readLine();
         try {
             Order order = approvalService.approve(orderId);
+            dataStore.save();
             io.println("승인 완료: [" + orderId + "] → " + order.getStatus());
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());
@@ -71,6 +75,7 @@ public class ApprovalMenuHandler {
         String orderId = io.readLine();
         try {
             approvalService.reject(orderId);
+            dataStore.save();
             io.println("거절 완료: [" + orderId + "]");
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());

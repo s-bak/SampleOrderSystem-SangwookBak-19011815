@@ -1,6 +1,7 @@
 package org.example.ui;
 
 import org.example.domain.Sample;
+import org.example.repository.JsonDataStore;
 import org.example.service.SampleService;
 
 import java.util.List;
@@ -9,10 +10,12 @@ public class SampleMenuHandler {
 
     private final ConsoleIO io;
     private final SampleService sampleService;
+    private final JsonDataStore dataStore;
 
-    public SampleMenuHandler(ConsoleIO io, SampleService sampleService) {
+    public SampleMenuHandler(ConsoleIO io, SampleService sampleService, JsonDataStore dataStore) {
         this.io = io;
         this.sampleService = sampleService;
+        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -63,6 +66,7 @@ public class SampleMenuHandler {
         }
         try {
             Sample s = sampleService.register(id, name, avgTime, yield, 0);
+            dataStore.save();
             io.println("등록 완료: [" + s.getId() + "] " + s.getName());
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());

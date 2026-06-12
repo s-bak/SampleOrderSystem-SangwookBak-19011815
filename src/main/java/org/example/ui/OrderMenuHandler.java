@@ -1,6 +1,7 @@
 package org.example.ui;
 
 import org.example.domain.Order;
+import org.example.repository.JsonDataStore;
 import org.example.service.OrderService;
 import org.example.service.SampleService;
 
@@ -11,11 +12,13 @@ public class OrderMenuHandler {
     private final ConsoleIO io;
     private final OrderService orderService;
     private final SampleService sampleService;
+    private final JsonDataStore dataStore;
 
-    public OrderMenuHandler(ConsoleIO io, OrderService orderService, SampleService sampleService) {
+    public OrderMenuHandler(ConsoleIO io, OrderService orderService, SampleService sampleService, JsonDataStore dataStore) {
         this.io = io;
         this.orderService = orderService;
         this.sampleService = sampleService;
+        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -51,6 +54,7 @@ public class OrderMenuHandler {
         int quantity = io.readInt("주문 수량: ");
         try {
             Order order = orderService.placeOrder(sampleId, customerName, quantity);
+            dataStore.save();
             io.println("주문 등록 완료: [" + order.getOrderId() + "] " + customerName + " / " + order.getSample().getName() + " x" + quantity);
         } catch (Exception e) {
             io.println("[오류] " + e.getMessage());
