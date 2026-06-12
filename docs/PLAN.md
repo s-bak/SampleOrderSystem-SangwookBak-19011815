@@ -437,7 +437,7 @@
   - `고갈`: `stock == 0`
   - `부족`: `stock > 0` AND `pendingQuantity > 0` (RESERVED + PRODUCING 대기 존재)
   - `여유`: `stock > 0` AND `pendingQuantity == 0`
-- `MonitoringServiceTest` 갱신: `getStockStatus_여유()` → `getStockStatus_재고있고대기있으면_부족()`
+- `MonitoringServiceTest` 갱신: 재고 상태 3가지 기준에 맞춰 테스트 케이스 재구성
 
 **검증 기준**
 - `./gradlew test` BUILD SUCCESSFUL
@@ -566,6 +566,43 @@
 
 ---
 
+### Phase 9-29 — Corner Case 단위 테스트 보강 (90 → 157개)
+
+**목표:** 기존 단위 테스트에서 커버하지 않은 경계 조건·복원 경로·예외 흐름을 추가하여 테스트 커버리지를 높인다.
+
+**작업 목록**
+- `ProductionQueueTest` 신규 작성 (22개): 빈 큐 즉시 시작, 순차 처리, `startNext()`, `getWaiting()` 등
+- `ProductionJobTest` 보완: `restore()`, `isActive()`, `addStock()`, `getRemainingShortfall()` 경계값
+- `OrderTest` 보완: 잘못된 상태 전이 예외, `createdAt` 불변성 등
+- `SampleTest` 보완: 재고·수율 경계값 추가
+- `OrderRepositoryTest` 보완: `restoreFromDb()` 시퀀스 미증가 검증
+- `ApprovalServiceTest` 보완: 가용 재고 계산 시나리오(CONFIRMED + PRODUCING 복합)
+- `ProductionServiceTest` 보완: 비PRODUCING 상태 완료 시도 예외
+- `SampleServiceTest` 보완: 중복 등록·존재하지 않는 ID 예외
+- `MonitoringServiceTest` 보완: RELEASE·REJECTED 주문 제외 검증 등
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL (157개)
+
+---
+
+### Phase 9-30 — 테스트 메서드명 한글 → 영어 변환
+
+**목표:** 테스트 메서드명에 포함된 한글을 영어로 통일하여 코드베이스 일관성을 확보한다.
+
+**작업 목록**
+- `MonitoringServiceTest`: 한글 포함 메서드명 5개 영어로 변환
+  - `getStockStatus_재고있고대기있으면_부족` → `getStockStatus_withStockAndPendingOrders_returnsShortage`
+  - `getStockStatus_부족` → `getStockStatus_shortage`
+  - `getStockStatus_고갈` → `getStockStatus_depleted`
+  - `getStockStatus_noPending_여유` → `getStockStatus_noPending_sufficient`
+  - `getStockStatus_noPending_고갈` → `getStockStatus_noPending_depleted`
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
 ### Phase 9-28 — 모든 입력에서 빈 값 입력 시 이전 메뉴 복귀
 
 **목표:** 어떤 입력 단계에서든 빈 값(Enter)을 입력하면 `[안내] 입력이 없어 이전 메뉴로 돌아갑니다.` 메시지를 출력하고 해당 메서드를 즉시 반환한다.
@@ -647,4 +684,6 @@
 | 9-26 | 승인·거절·출고 전 목록 먼저 출력 | `approve()`, `reject()`, `release()` 각각 관련 주문 목록 출력 후 ID 입력 |
 | 9-27 | 주문 등록 전 시료 목록 먼저 출력 | `placeOrder()` 시료 없으면 오류, 있으면 목록 출력 후 ID 입력 |
 | 9-28 | 빈 입력 시 이전 메뉴 복귀 | 모든 입력에서 빈 값 → `[안내]` 출력 후 즉시 반환 |
+| 9-29 | Corner Case 단위 테스트 보강 | 90 → 157개; `ProductionQueueTest` 신규, 각 레이어 경계 조건 추가 |
+| 9-30 | 테스트 메서드명 영어화 | `MonitoringServiceTest` 한글 메서드명 5개 → 영어 변환 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
