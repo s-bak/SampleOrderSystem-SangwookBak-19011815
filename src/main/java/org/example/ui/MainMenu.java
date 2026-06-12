@@ -38,7 +38,7 @@ public class MainMenu {
         this.io = io;
         this.sampleService = sampleService;
         this.sampleHandler = new SampleMenuHandler(io, sampleService);
-        this.orderHandler = new OrderMenuHandler(io, orderService);
+        this.orderHandler = new OrderMenuHandler(io, orderService, sampleService);
         this.approvalHandler = new ApprovalMenuHandler(io, approvalService, orderRepository);
         this.monitoringHandler = new MonitoringMenuHandler(io, monitoringService);
         this.releaseHandler = new ReleaseMenuHandler(io, releaseService, orderRepository);

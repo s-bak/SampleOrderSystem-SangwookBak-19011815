@@ -2,6 +2,7 @@ package org.example.ui;
 
 import org.example.domain.Order;
 import org.example.service.OrderService;
+import org.example.service.SampleService;
 
 import java.util.List;
 
@@ -9,10 +10,12 @@ public class OrderMenuHandler {
 
     private final ConsoleIO io;
     private final OrderService orderService;
+    private final SampleService sampleService;
 
-    public OrderMenuHandler(ConsoleIO io, OrderService orderService) {
+    public OrderMenuHandler(ConsoleIO io, OrderService orderService, SampleService sampleService) {
         this.io = io;
         this.orderService = orderService;
+        this.sampleService = sampleService;
     }
 
     public void handle() {
@@ -34,8 +37,15 @@ public class OrderMenuHandler {
     }
 
     private void placeOrder() {
-        io.print("시료 ID: ");
-        String sampleId = io.readLine();
+        String sampleId;
+        while (true) {
+            io.print("시료 ID: ");
+            sampleId = io.readLine();
+            if (sampleService.existsById(sampleId)) {
+                break;
+            }
+            io.println("[오류] 존재하지 않는 시료 ID입니다: " + sampleId);
+        }
         io.print("고객명: ");
         String customerName = io.readLine();
         int quantity = io.readInt("주문 수량: ");
