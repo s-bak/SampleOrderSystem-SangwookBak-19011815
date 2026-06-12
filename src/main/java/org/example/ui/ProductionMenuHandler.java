@@ -86,8 +86,8 @@ public class ProductionMenuHandler {
     private void printCurrentJobRow(ProductionJob job) {
         var order = job.getOrder();
         var sample = order.getSample();
-        double progressPct = job.getActualProductionCount() == 0 ? 100.0
-                : (double) job.getUnitsAdded() / job.getActualProductionCount() * 100.0;
+        double elapsedMs = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMillis();
+        double progressPct = Math.min(100.0, elapsedMs / (job.getTotalProductionTime() * 60_000) * 100.0);
         io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
                 sample.getName(),
