@@ -62,12 +62,10 @@ public class MonitoringService {
             this.status = determineStatus(sample.getStock(), confirmedQuantity, pendingQuantity);
         }
 
-        // available = stock - confirmedQuantity (CONFIRMED 주문에 할당된 재고 제외)
         private static String determineStatus(int stock, int confirmedQuantity, int pendingQuantity) {
-            int available = Math.max(0, stock - confirmedQuantity);
-            if (available == 0) return "고갈";
-            if (available >= pendingQuantity) return "여유";
-            return "부족";
+            if (stock == 0) return "고갈";
+            if (pendingQuantity > 0) return "부족";
+            return "여유";
         }
 
         public Sample getSample() { return sample; }

@@ -77,13 +77,14 @@ class MonitoringServiceTest {
     }
 
     @Test
-    void getStockStatus_여유() {
+    void getStockStatus_재고있고대기있으면_부족() {
         Sample s = registerSample("S-001", 10);
         placeOrder(s, 5);
 
         List<MonitoringService.StockStatusEntry> entries = monitoringService.getStockStatus();
         assertEquals(1, entries.size());
-        assertEquals("여유", entries.get(0).getStatus());
+        // 재고 > 0 이고 대기 수량 > 0 → 부족
+        assertEquals("부족", entries.get(0).getStatus());
         assertEquals(5, entries.get(0).getPendingQuantity());
     }
 
