@@ -78,4 +78,10 @@ class ProductionMenuHandlerTest {
         new ProductionMenuHandler(io("2\n0\n"), queue).handle();
         assertTrue(output().contains("O-002"), output());
     }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new ProductionMenuHandler(io("X\n0\n"), queue).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
 }

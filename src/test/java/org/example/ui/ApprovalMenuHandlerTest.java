@@ -1,12 +1,14 @@
 package org.example.ui;
 
 import org.example.domain.Order;
+import org.example.domain.OrderStatus;
 import org.example.domain.Sample;
 import org.example.repository.JsonDataStore;
 import org.example.repository.OrderRepository;
 import org.example.repository.SampleRepository;
 import org.example.domain.ProductionQueue;
 import org.example.service.ApprovalService;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -119,5 +121,58 @@ class ApprovalMenuHandlerTest {
         orderRepo.save(o);
         new ApprovalMenuHandler(io("4\n\n0\n"), approvalSvc, orderRepo, ds).handle();
         assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new ApprovalMenuHandler(io("X\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_listReserved_withOrders_showsTable() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order o = new Order(orderRepo.generateNextId(), "고객A", s, 5);
+        orderRepo.save(o);
+        new ApprovalMenuHandler(io("1\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("O-001"), output());
+        assertTrue(output().contains("고객A"), output());
+    }
+
+    @Test
+    void handle_listRejected_withOrders_showsTable() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order rejected = Order.restore("O-001", "고객A", s, 5, OrderStatus.REJECTED, LocalDateTime.now());
+        orderRepo.restoreFromDb(rejected);
+        new ApprovalMenuHandler(io("2\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("O-001"), output());
+    }
+
+    @Test
+    void handle_approve_invalidOrderId_showsError() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order o = new Order(orderRepo.generateNextId(), "고객A", s, 5);
+        orderRepo.save(o);
+        new ApprovalMenuHandler(io("3\nO-999\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_reject_noReserved_showsError() {
+        new ApprovalMenuHandler(io("4\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_reject_invalidOrderId_showsError() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order o = new Order(orderRepo.generateNextId(), "고객A", s, 5);
+        orderRepo.save(o);
+        new ApprovalMenuHandler(io("4\nO-999\n0\n"), approvalSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
     }
 }

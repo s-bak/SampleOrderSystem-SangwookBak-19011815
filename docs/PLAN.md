@@ -282,13 +282,15 @@
 
 ---
 
-### Phase 9-10 — 시료명 · 고객명 공백 입력 차단
+### Phase 9-10 — 시료명 · 고객명 공백 입력 차단 (후속: 9-31에서 dead code 제거)
 
 **목표:** 시료 등록 시 시료명, 주문 등록 시 고객명이 공백이면 오류 메시지를 출력하고 중단한다.
 
 **작업 목록**
 - `SampleMenuHandler.register()`: 시료명 입력 루프 — `isBlank()` 시 오류 출력 후 재입력
 - `OrderMenuHandler.placeOrder()`: 고객명 입력 루프 — `isBlank()` 시 오류 출력 후 재입력
+
+> **참고:** `ConsoleIO.readLine()`이 항상 `trim()`을 적용하므로 공백 전용 입력은 빈 문자열로 변환되어 `isBlank()` 분기에 도달할 수 없다(dead code). Phase 9-31에서 해당 코드를 제거하고 동작을 "빈 입력 → 이전 메뉴 복귀"로 통일.
 
 ---
 
@@ -588,6 +590,27 @@
 
 ---
 
+### Phase 9-31 — UI 레이어 테스트 커버리지 100% 달성
+
+**목표:** repository·service 레이어에 이어 UI 레이어도 100% 라인/분기 커버리지를 달성한다.
+
+**작업 목록**
+- `SampleMenuHandler` dead code 제거
+  - `register()`: 시료명 입력 `while(true)` + `isBlank()` 루프 → 단순 `readLine()` + `isEmpty()` 즉시 반환으로 교체 (`trim()` 적용 후 blank 입력은 항상 empty이므로 `isBlank()` 분기 불필요)
+- `OrderMenuHandler` dead code 제거
+  - `placeOrder()`: 고객명 입력 `while(true)` + `isBlank()` 루프 → 단순 `readLine()` + `isEmpty()` 즉시 반환으로 교체
+- `SampleMenuHandlerTest` +16개: 메인 default, 평균 생산시간 빈값·오류, 수율 빈값·포맷 오류, 검색 field empty/default, case 2·3·4 키워드 성공/빈값/포맷 오류
+- `OrderMenuHandlerTest` +5개: 메인 default, 잘못된 시료ID 재입력, 빈 고객명, 빈 수량, 서비스 예외
+- `ApprovalMenuHandlerTest` +7개: 메인 default, 접수 목록(데이터 있음), 거절 목록(데이터 있음), 잘못된 주문ID 승인, 거절 대기 없음, 잘못된 주문ID 거절
+- `ReleaseMenuHandlerTest` +3개: 메인 default, 확인 목록(데이터 있음), 잘못된 주문ID 출고
+- `ProductionMenuHandlerTest` +1개: 메인 default
+- `MonitoringMenuHandlerTest` +3개: 메인 default, 재고 "부족" 표시, 재고 "고갈" 표시
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL (227개)
+
+---
+
 ### Phase 9-29 — Corner Case 단위 테스트 보강 (90 → 157개)
 
 **목표:** 기존 단위 테스트에서 커버하지 않은 경계 조건·복원 경로·예외 흐름을 추가하여 테스트 커버리지를 높인다.
@@ -686,4 +709,5 @@
 | 9-28 | 빈 입력 시 이전 메뉴 복귀 | 모든 입력에서 빈 값 → `[안내]` 출력 후 즉시 반환 |
 | 9-29 | Corner Case 단위 테스트 보강 | 90 → 157개; `ProductionQueueTest` 신규, 각 레이어 경계 조건 추가 |
 | 9-30 | 테스트 메서드명 영어화 | `MonitoringServiceTest` 한글 메서드명 5개 → 영어 변환 |
+| 9-31 | UI 레이어 테스트 커버리지 100% | dead code 제거(isBlank 루프), UI 핸들러 전체 +35개 → 227개 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

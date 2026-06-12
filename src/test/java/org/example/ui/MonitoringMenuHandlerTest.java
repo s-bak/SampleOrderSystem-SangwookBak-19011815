@@ -5,6 +5,7 @@ import org.example.domain.Sample;
 import org.example.repository.OrderRepository;
 import org.example.repository.SampleRepository;
 import org.example.service.MonitoringService;
+import org.example.domain.ProductionQueue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -70,5 +71,28 @@ class MonitoringMenuHandlerTest {
         new MonitoringMenuHandler(io("2\n0\n"), monitorSvc).handle();
         assertTrue(output().contains("S-001"), output());
         assertTrue(output().contains("여유"), output());
+    }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new MonitoringMenuHandler(io("X\n0\n"), monitorSvc).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_showStockStatus_부족_showsStatus() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order o = new Order(orderRepo.generateNextId(), "고객A", s, 5);
+        orderRepo.save(o);
+        new MonitoringMenuHandler(io("2\n0\n"), monitorSvc).handle();
+        assertTrue(output().contains("부족"), output());
+    }
+
+    @Test
+    void handle_showStockStatus_고갈_showsStatus() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 0));
+        new MonitoringMenuHandler(io("2\n0\n"), monitorSvc).handle();
+        assertTrue(output().contains("고갈"), output());
     }
 }

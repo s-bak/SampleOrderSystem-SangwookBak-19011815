@@ -126,4 +126,101 @@ class SampleMenuHandlerTest {
         new SampleMenuHandler(io("3\n1\n\n0\n"), sampleSvc, ds).handle();
         assertTrue(output().contains("[안내]"), output());
     }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new SampleMenuHandler(io("X\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_register_emptyAvgTime_returnsToMenu() {
+        new SampleMenuHandler(io("1\nS-001\nAlphaChip\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+        assertFalse(sampleSvc.existsById("S-001"), output());
+    }
+
+    @Test
+    void handle_register_invalidAvgTime_showsError() {
+        new SampleMenuHandler(io("1\nS-001\nAlphaChip\nabc\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+        assertFalse(sampleSvc.existsById("S-001"), output());
+    }
+
+    @Test
+    void handle_register_emptyYield_returnsToMenu() {
+        new SampleMenuHandler(io("1\nS-001\nAlphaChip\n30\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+        assertFalse(sampleSvc.existsById("S-001"), output());
+    }
+
+    @Test
+    void handle_register_invalidYieldFormat_showsError() {
+        new SampleMenuHandler(io("1\nS-001\nAlphaChip\n30\nabc\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+        assertFalse(sampleSvc.existsById("S-001"), output());
+    }
+
+    @Test
+    void handle_search_emptyField_returnsToMenu() {
+        new SampleMenuHandler(io("3\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_search_invalidField_showsError() {
+        new SampleMenuHandler(io("3\n9\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_search_byName_found() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new SampleMenuHandler(io("3\n2\nAlpha\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("S-001"), output());
+    }
+
+    @Test
+    void handle_search_byName_emptyKeyword_returnsToMenu() {
+        new SampleMenuHandler(io("3\n2\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_search_byAvgTime_found() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new SampleMenuHandler(io("3\n3\n30.0\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("S-001"), output());
+    }
+
+    @Test
+    void handle_search_byAvgTime_emptyInput_returnsToMenu() {
+        new SampleMenuHandler(io("3\n3\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_search_byAvgTime_invalidNumber_showsError() {
+        new SampleMenuHandler(io("3\n3\nabc\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_search_byYield_found() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new SampleMenuHandler(io("3\n4\n0.85\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("S-001"), output());
+    }
+
+    @Test
+    void handle_search_byYield_emptyInput_returnsToMenu() {
+        new SampleMenuHandler(io("3\n4\n\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_search_byYield_invalidNumber_showsError() {
+        new SampleMenuHandler(io("3\n4\nabc\n0\n"), sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
 }

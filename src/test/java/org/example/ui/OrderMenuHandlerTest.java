@@ -99,4 +99,39 @@ class OrderMenuHandlerTest {
         assertTrue(output().contains("O-001"), output());
         assertTrue(output().contains("고객A"), output());
     }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new OrderMenuHandler(io("X\n0\n"), orderSvc, sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_placeOrder_invalidSampleId_retriesInput() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new OrderMenuHandler(io("1\nS-999\nS-001\n고객A\n5\n0\n"), orderSvc, sampleSvc, ds).handle();
+        assertTrue(output().contains("존재하지 않는 시료 ID"), output());
+        assertTrue(output().contains("주문 등록 완료"), output());
+    }
+
+    @Test
+    void handle_placeOrder_emptyCustomerName_returnsToMenu() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new OrderMenuHandler(io("1\nS-001\n\n0\n"), orderSvc, sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_placeOrder_emptyQuantity_returnsToMenu() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new OrderMenuHandler(io("1\nS-001\n고객A\n\n0\n"), orderSvc, sampleSvc, ds).handle();
+        assertTrue(output().contains("[안내]"), output());
+    }
+
+    @Test
+    void handle_placeOrder_serviceError_showsError() {
+        sampleRepo.save(new Sample("S-001", "AlphaChip", 30.0, 0.85, 10));
+        new OrderMenuHandler(io("1\nS-001\n고객A\n0\n0\n"), orderSvc, sampleSvc, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
 }

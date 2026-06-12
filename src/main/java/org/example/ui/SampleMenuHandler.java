@@ -53,16 +53,11 @@ public class SampleMenuHandler {
                 break;
             }
         }
-        String name;
-        while (true) {
-            io.print("시료명: ");
-            name = io.readLine();
-            if (name.isEmpty()) {
-                io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
-                return;
-            }
-            if (!name.isBlank()) break;
-            io.println("[오류] 시료명은 공백일 수 없습니다.");
+        io.print("시료명: ");
+        String name = io.readLine();
+        if (name.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
         }
         io.print("평균 생산시간 (min, 0 초과): ");
         String avgTimeStr = io.readLine();

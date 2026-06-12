@@ -85,4 +85,31 @@ class ReleaseMenuHandlerTest {
         new ReleaseMenuHandler(io("2\nO-001\n0\n"), releaseSvc, orderRepo, ds).handle();
         assertTrue(output().contains("출고 완료"), output());
     }
+
+    @Test
+    void handle_mainMenu_invalidInput_showsError() {
+        new ReleaseMenuHandler(io("X\n0\n"), releaseSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
+
+    @Test
+    void handle_listConfirmed_withOrders_showsTable() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order confirmed = Order.restore("O-001", "고객A", s, 5, OrderStatus.CONFIRMED, LocalDateTime.now());
+        orderRepo.restoreFromDb(confirmed);
+        new ReleaseMenuHandler(io("1\n0\n"), releaseSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("O-001"), output());
+        assertTrue(output().contains("고객A"), output());
+    }
+
+    @Test
+    void handle_release_invalidOrderId_showsError() {
+        Sample s = new Sample("S-001", "AlphaChip", 30.0, 0.85, 10);
+        sampleRepo.save(s);
+        Order confirmed = Order.restore("O-001", "고객A", s, 5, OrderStatus.CONFIRMED, LocalDateTime.now());
+        orderRepo.restoreFromDb(confirmed);
+        new ReleaseMenuHandler(io("2\nO-999\n0\n"), releaseSvc, orderRepo, ds).handle();
+        assertTrue(output().contains("[오류]"), output());
+    }
 }
