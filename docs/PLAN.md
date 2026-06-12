@@ -539,6 +539,55 @@
 
 ---
 
+### Phase 9-26 — 승인·거절·출고 실행 전 관련 주문 목록 먼저 출력
+
+**목표:** 주문 ID 입력 전에 처리 대상 주문 목록을 먼저 출력하여 담당자가 주문 ID를 확인한 후 입력할 수 있도록 한다.
+
+**작업 목록**
+- `ApprovalMenuHandler.approve()`: `RESERVED` 주문 목록 테이블 출력 후 주문 ID 입력 요청
+- `ApprovalMenuHandler.reject()`: `RESERVED` 주문 목록 테이블 출력 후 주문 ID 입력 요청
+- `ReleaseMenuHandler.release()`: `CONFIRMED` 주문 목록 테이블 출력 후 주문 ID 입력 요청; 출고 대기 주문 없으면 오류 출력 후 즉시 반환
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
+### Phase 9-27 — 주문 등록 전 시료 목록 먼저 출력
+
+**목표:** 주문 등록 시 등록된 시료가 없으면 즉시 오류 출력 후 메뉴 복귀, 있으면 시료 목록을 출력한 후 시료 ID 입력을 받는다.
+
+**작업 목록**
+- `OrderMenuHandler`: `Sample` import 추가
+- `OrderMenuHandler.placeOrder()`: `SampleService.findAll()` 호출 → 비어 있으면 오류 출력 후 반환; 있으면 `SAMPLE_SEP`·`SAMPLE_HEADER_FMT`·`SAMPLE_ROW_FMT` 상수 정의 후 시료 목록 테이블 출력 → 이후 기존 입력 흐름
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
+### Phase 9-28 — 모든 입력에서 빈 값 입력 시 이전 메뉴 복귀
+
+**목표:** 어떤 입력 단계에서든 빈 값(Enter)을 입력하면 `[안내] 입력이 없어 이전 메뉴로 돌아갑니다.` 메시지를 출력하고 해당 메서드를 즉시 반환한다.
+
+**작업 목록**
+- `SampleMenuHandler.register()`:
+  - 시료 ID, 시료명 입력 루프에 `isEmpty()` 즉시 반환 추가
+  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체하여 빈 값 구분 처리 (평균 생산시간, 수율)
+- `SampleMenuHandler.search()`:
+  - 항목 선택, ID/명 검색어, 평균 생산시간/수율 입력에 `isEmpty()` 즉시 반환 추가
+  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체
+- `OrderMenuHandler.placeOrder()`:
+  - 시료 ID, 고객명 입력 루프에 `isEmpty()` 즉시 반환 추가
+  - `readInt()` 호출 → `readLine()` + `Integer.parseInt()` 파싱으로 교체하여 빈 값 구분 처리
+- `ApprovalMenuHandler.approve()` / `reject()`: 주문 ID `isEmpty()` 즉시 반환 추가
+- `ReleaseMenuHandler.release()`: 주문 ID `isEmpty()` 즉시 반환 추가
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -595,4 +644,7 @@
 | 9-23 | 가용 재고 계산 버그 수정 | `available = stock − confirmedQty − producingStockAdded` |
 | 9-24 | orderSequence 중복 증가 버그 수정 | `OrderRepository.restoreFromDb()`, `JsonDataStore.load()` 교체 |
 | 9-25 | 전체 테이블 `\|` 구분자 형식 통일 | 모든 `*MenuHandler` 테이블을 `+---+`/`\| col \|` 형식으로 통일 |
+| 9-26 | 승인·거절·출고 전 목록 먼저 출력 | `approve()`, `reject()`, `release()` 각각 관련 주문 목록 출력 후 ID 입력 |
+| 9-27 | 주문 등록 전 시료 목록 먼저 출력 | `placeOrder()` 시료 없으면 오류, 있으면 목록 출력 후 ID 입력 |
+| 9-28 | 빈 입력 시 이전 메뉴 복귀 | 모든 입력에서 빈 값 → `[안내]` 출력 후 즉시 반환 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

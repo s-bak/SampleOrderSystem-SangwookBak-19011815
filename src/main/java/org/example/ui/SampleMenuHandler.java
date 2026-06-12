@@ -43,6 +43,10 @@ public class SampleMenuHandler {
         while (true) {
             io.print("시료 ID (예: S-001): ");
             id = io.readLine();
+            if (id.isEmpty()) {
+                io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                return;
+            }
             if (sampleService.existsById(id)) {
                 io.println("[오류] 이미 존재하는 시료 ID입니다: " + id);
             } else {
@@ -53,18 +57,39 @@ public class SampleMenuHandler {
         while (true) {
             io.print("시료명: ");
             name = io.readLine();
+            if (name.isEmpty()) {
+                io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                return;
+            }
             if (!name.isBlank()) break;
             io.println("[오류] 시료명은 공백일 수 없습니다.");
         }
-        double avgTime = io.readDouble("평균 생산시간 (min, 0 초과): ");
-        if (Double.isNaN(avgTime) || avgTime <= 0) {
+        io.print("평균 생산시간 (min, 0 초과): ");
+        String avgTimeStr = io.readLine();
+        if (avgTimeStr.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
+        double avgTime;
+        try {
+            avgTime = Double.parseDouble(avgTimeStr);
+        } catch (NumberFormatException e) {
+            io.println("[오류] 올바른 숫자를 입력해주세요.");
+            return;
+        }
+        if (avgTime <= 0) {
             io.println("[오류] 평균 생산시간은 0 초과의 숫자여야 합니다.");
             return;
         }
         io.print("수율 (0 초과 1 이하): ");
+        String yieldStr = io.readLine();
+        if (yieldStr.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
         double yield;
         try {
-            yield = Double.parseDouble(io.readLine());
+            yield = Double.parseDouble(yieldStr);
         } catch (NumberFormatException e) {
             io.println("[오류] 올바른 수율을 입력해주세요.");
             return;
@@ -97,28 +122,58 @@ public class SampleMenuHandler {
         io.println("4. 수율");
         io.print("선택> ");
         String field = io.readLine();
+        if (field.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
 
         List<Sample> list;
         switch (field) {
             case "1" -> {
                 io.print("시료 ID 검색어: ");
-                list = sampleService.searchById(io.readLine());
+                String keyword = io.readLine();
+                if (keyword.isEmpty()) {
+                    io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                list = sampleService.searchById(keyword);
             }
             case "2" -> {
                 io.print("시료명 검색어: ");
-                list = sampleService.search(io.readLine());
+                String keyword = io.readLine();
+                if (keyword.isEmpty()) {
+                    io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                list = sampleService.search(keyword);
             }
             case "3" -> {
-                double time = io.readDouble("평균 생산시간: ");
-                if (Double.isNaN(time)) {
+                io.print("평균 생산시간: ");
+                String timeStr = io.readLine();
+                if (timeStr.isEmpty()) {
+                    io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                double time;
+                try {
+                    time = Double.parseDouble(timeStr);
+                } catch (NumberFormatException e) {
                     io.println("[오류] 올바른 숫자를 입력해주세요.");
                     return;
                 }
                 list = sampleService.searchByAvgProductionTime(time);
             }
             case "4" -> {
-                double yield = io.readDouble("수율: ");
-                if (Double.isNaN(yield)) {
+                io.print("수율: ");
+                String yieldStr = io.readLine();
+                if (yieldStr.isEmpty()) {
+                    io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                double yield;
+                try {
+                    yield = Double.parseDouble(yieldStr);
+                } catch (NumberFormatException e) {
                     io.println("[오류] 올바른 숫자를 입력해주세요.");
                     return;
                 }

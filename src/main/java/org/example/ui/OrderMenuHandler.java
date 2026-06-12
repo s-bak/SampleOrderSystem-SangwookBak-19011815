@@ -1,6 +1,7 @@
 package org.example.ui;
 
 import org.example.domain.Order;
+import org.example.domain.Sample;
 import org.example.repository.JsonDataStore;
 import org.example.service.OrderService;
 import org.example.service.SampleService;
@@ -39,11 +40,32 @@ public class OrderMenuHandler {
         }
     }
 
+    private static final String SAMPLE_SEP        = "+--------+-------------------+-----------------+--------+--------+";
+    private static final String SAMPLE_HEADER_FMT = "| %-6s | %-17s | %13s | %6s | %6s |";
+    private static final String SAMPLE_ROW_FMT    = "| %-6s | %-17s | %13.1f | %6.2f | %6d |";
+
     private void placeOrder() {
+        List<Sample> samples = sampleService.findAll();
+        if (samples.isEmpty()) {
+            io.println("[오류] 등록된 시료가 없습니다.");
+            return;
+        }
+        io.println(SAMPLE_SEP);
+        io.println(String.format(SAMPLE_HEADER_FMT, "시료ID", "시료명", "생산시간(min)", "수율", "재고"));
+        io.println(SAMPLE_SEP);
+        for (Sample s : samples) {
+            io.println(String.format(SAMPLE_ROW_FMT,
+                    s.getId(), s.getName(), s.getAvgProductionTime(), s.getYield(), s.getStock()));
+            io.println(SAMPLE_SEP);
+        }
         String sampleId;
         while (true) {
             io.print("시료 ID: ");
             sampleId = io.readLine();
+            if (sampleId.isEmpty()) {
+                io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                return;
+            }
             if (sampleService.existsById(sampleId)) {
                 break;
             }
@@ -53,10 +75,26 @@ public class OrderMenuHandler {
         while (true) {
             io.print("고객명: ");
             customerName = io.readLine();
+            if (customerName.isEmpty()) {
+                io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+                return;
+            }
             if (!customerName.isBlank()) break;
             io.println("[오류] 고객명은 공백일 수 없습니다.");
         }
-        int quantity = io.readInt("주문 수량: ");
+        io.print("주문 수량: ");
+        String quantityStr = io.readLine();
+        if (quantityStr.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
+        int quantity;
+        try {
+            quantity = Integer.parseInt(quantityStr);
+        } catch (NumberFormatException e) {
+            io.println("[오류] 올바른 수량을 입력해주세요.");
+            return;
+        }
         try {
             Order order = orderService.placeOrder(sampleId, customerName, quantity);
             dataStore.save();

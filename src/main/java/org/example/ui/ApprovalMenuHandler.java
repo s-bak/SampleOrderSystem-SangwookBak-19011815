@@ -83,12 +83,26 @@ public class ApprovalMenuHandler {
     }
 
     private void approve() {
-        if (orderRepository.findByStatus(OrderStatus.RESERVED).isEmpty()) {
+        List<Order> reserved = orderRepository.findByStatus(OrderStatus.RESERVED);
+        if (reserved.isEmpty()) {
             io.println("[오류] 대기 중인 주문이 없습니다.");
             return;
         }
+        io.println(APPROVAL_SEP);
+        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println(APPROVAL_SEP);
+        for (Order o : reserved) {
+            io.println(String.format(APPROVAL_ROW_FMT,
+                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
+                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+            io.println(APPROVAL_SEP);
+        }
         io.print("승인할 주문 ID: ");
         String orderId = io.readLine();
+        if (orderId.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
         try {
             Order order = approvalService.approve(orderId);
             dataStore.save();
@@ -99,12 +113,26 @@ public class ApprovalMenuHandler {
     }
 
     private void reject() {
-        if (orderRepository.findByStatus(OrderStatus.RESERVED).isEmpty()) {
+        List<Order> reserved = orderRepository.findByStatus(OrderStatus.RESERVED);
+        if (reserved.isEmpty()) {
             io.println("[오류] 대기 중인 주문이 없습니다.");
             return;
         }
+        io.println(APPROVAL_SEP);
+        io.println(String.format(APPROVAL_HEADER_FMT, "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println(APPROVAL_SEP);
+        for (Order o : reserved) {
+            io.println(String.format(APPROVAL_ROW_FMT,
+                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
+                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+            io.println(APPROVAL_SEP);
+        }
         io.print("거절할 주문 ID: ");
         String orderId = io.readLine();
+        if (orderId.isEmpty()) {
+            io.println("[안내] 입력이 없어 이전 메뉴로 돌아갑니다.");
+            return;
+        }
         try {
             approvalService.reject(orderId);
             dataStore.save();
