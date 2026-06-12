@@ -409,6 +409,58 @@
 
 ---
 
+### Phase 9-18 — 재고 차감 시점 출고로 이동 + shortfall에 CONFIRMED 수량 반영
+
+**목표:** 재고 차감을 CONFIRMED 시점에서 RELEASE 시점으로 이동하고, 승인 시 가용 재고를 `stock − CONFIRMED 수량`으로 계산하여 shortfall을 정확히 산정한다.
+
+**작업 목록**
+- `ApprovalService.approve()`:
+  - CONFIRMED 시 `decreaseStock()` 제거
+  - 가용 재고 = `sample.stock − sum(CONFIRMED 주문 수량, 동일 시료 기준)`
+  - 재고 충분 시 → `CONFIRMED` (재고 불변)
+  - 재고 부족 시 → `shortfall = 주문 수량 − max(0, 가용 재고)`, `enqueue(order, shortfall)`, `PRODUCING`
+- `ProductionQueue.enqueue(Order, int shortfall)`: shortfall을 외부에서 받도록 시그니처 변경 (내부 계산 제거)
+- `ReleaseService.release()`: `decreaseStock(quantity)` 추가 — 출고 시 재고 차감
+- 관련 단위 테스트 일체 갱신
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
+### Phase 9-19 — 재고 상태 판단 기준 단순화
+
+**목표:** 재고 상태(여유/부족/고갈) 판단을 물리 재고와 대기 수량 기준으로 단순화한다.
+
+**작업 목록**
+- `MonitoringService.StockStatusEntry.determineStatus()` 수정
+  - `고갈`: `stock == 0`
+  - `부족`: `stock > 0` AND `pendingQuantity > 0` (RESERVED + PRODUCING 대기 존재)
+  - `여유`: `stock > 0` AND `pendingQuantity == 0`
+- `MonitoringServiceTest` 갱신: `getStockStatus_여유()` → `getStockStatus_재고있고대기있으면_부족()`
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
+### Phase 9-20 — 생산 완료 백그라운드 자동 처리
+
+**목표:** 생산 현황 조회 없이도 진행률 100% 도달 시 즉시 생산 완료·재고 업데이트가 이루어지도록 백그라운드 스케줄러를 도입한다.
+
+**작업 목록**
+- `ProductionScheduler` 신규
+  - `ScheduledExecutorService` (데몬 스레드, 1초 주기) 로 `checkAndComplete()` 반복 실행
+  - 현재 활성 작업의 진행률 ≥ 100% → `productionService.complete()` + `dataStore.save()` 자동 호출
+  - 중복 호출 시 예외 무시
+- `Application`: `scheduler.start()` (DB 로드 후), `scheduler.stop()` (메인 루프 종료 후)
+- `ProductionMenuHandler`: 자동완료 코드 제거, 불필요해진 `ProductionService` · `JsonDataStore` 의존성 제거
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -457,4 +509,7 @@
 | 9-15 | 생산 현황 상세 출력 + 진행률 | `ProductionJob.startedAt` 승인 시점 기록, 현황 9컬럼 출력, 진행률(%) 실시간 계산 |
 | 9-16 | 진행률 정밀 계산 + 재고 자동 완료 | 밀리초 기반 진행률 수정, 100% 도달 시 생산 자동 완료·재고 즉시 반영 |
 | 9-17 | 생산 큐 순차 처리 | `enqueuedAt`/`startedAt` 분리, 빈 큐 즉시 시작, 대기 후 순차 처리, `startNext()` |
+| 9-18 | 재고 차감 시점 출고로 이동 | 승인 시 재고 불변, 가용=stock−CONFIRMED, 출고 시 `decreaseStock` |
+| 9-19 | 재고 상태 기준 단순화 | 고갈=stock==0, 부족=stock>0&대기>0, 여유=stock>0&대기없음 |
+| 9-20 | 생산 완료 백그라운드 자동 처리 | `ProductionScheduler` 1초 주기 데몬 스레드, UI 독립 자동 완료 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
