@@ -13,7 +13,7 @@ public class SampleService {
         this.sampleRepository = sampleRepository;
     }
 
-    public Sample register(String id, String name, int avgProductionTime, double yield, int initialStock) {
+    public Sample register(String id, String name, double avgProductionTime, double yield, int initialStock) {
         if (sampleRepository.findById(id).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 시료 ID입니다: " + id);
         }

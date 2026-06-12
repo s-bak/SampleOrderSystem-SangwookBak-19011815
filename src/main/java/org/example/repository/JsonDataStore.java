@@ -118,7 +118,7 @@ public class JsonDataStore {
 
     public static class SampleDto {
         public String id, name;
-        public int avgProductionTime;
+        public double avgProductionTime;
         public double yield;
         public int stock;
     }

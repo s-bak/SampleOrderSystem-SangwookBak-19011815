@@ -73,7 +73,7 @@ public class ProductionMenuHandler {
     }
 
     private void printJobRow(ProductionJob job) {
-        io.println(String.format("%-8s %-15s %8d %14d",
+        io.println(String.format("%-8s %-15s %8d %14.1f",
                 job.getOrder().getOrderId(),
                 job.getOrder().getSample().getName(),
                 job.getActualProductionCount(),

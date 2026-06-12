@@ -39,4 +39,14 @@ public class ConsoleIO {
             return -1;
         }
     }
+
+    public double readDouble(String prompt) {
+        print(prompt);
+        String input = readLine();
+        try {
+            return Double.parseDouble(input);
+        } catch (NumberFormatException e) {
+            return Double.NaN;
+        }
+    }
 }

@@ -4,7 +4,7 @@ public class ProductionJob {
 
     private final Order order;
     private final int actualProductionCount;
-    private final int totalProductionTime;
+    private final double totalProductionTime;
 
     public ProductionJob(Order order, int shortfall) {
         if (shortfall < 1) {
@@ -17,5 +17,5 @@ public class ProductionJob {
 
     public Order getOrder() { return order; }
     public int getActualProductionCount() { return actualProductionCount; }
-    public int getTotalProductionTime() { return totalProductionTime; }
+    public double getTotalProductionTime() { return totalProductionTime; }
 }

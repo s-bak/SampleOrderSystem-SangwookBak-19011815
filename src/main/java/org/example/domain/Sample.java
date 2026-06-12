@@ -4,19 +4,19 @@ public class Sample {
 
     private final String id;
     private final String name;
-    private final int avgProductionTime;
+    private final double avgProductionTime;
     private final double yield;
     private int stock;
 
-    public Sample(String id, String name, int avgProductionTime, double yield, int stock) {
+    public Sample(String id, String name, double avgProductionTime, double yield, int stock) {
         if (yield <= 0 || yield > 1) {
             throw new IllegalArgumentException("수율은 0 초과 1 이하여야 합니다.");
         }
         if (stock < 0) {
             throw new IllegalArgumentException("재고 수량은 0 이상이어야 합니다.");
         }
-        if (avgProductionTime < 1) {
-            throw new IllegalArgumentException("평균 생산시간은 1 이상이어야 합니다.");
+        if (avgProductionTime < 0) {
+            throw new IllegalArgumentException("평균 생산시간은 0 이상이어야 합니다.");
         }
         this.id = id;
         this.name = name;
@@ -41,7 +41,7 @@ public class Sample {
 
     public String getId() { return id; }
     public String getName() { return name; }
-    public int getAvgProductionTime() { return avgProductionTime; }
+    public double getAvgProductionTime() { return avgProductionTime; }
     public double getYield() { return yield; }
     public int getStock() { return stock; }
 }

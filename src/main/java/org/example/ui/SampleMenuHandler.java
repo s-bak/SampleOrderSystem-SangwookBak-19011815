@@ -48,7 +48,11 @@ public class SampleMenuHandler {
         }
         io.print("시료명: ");
         String name = io.readLine();
-        int avgTime = io.readInt("평균 생산시간 (min): ");
+        double avgTime = io.readDouble("평균 생산시간 (min, 0 이상): ");
+        if (Double.isNaN(avgTime) || avgTime < 0) {
+            io.println("[오류] 평균 생산시간은 0 이상의 숫자여야 합니다.");
+            return;
+        }
         io.print("수율 (0 초과 1 이하): ");
         double yield;
         try {
@@ -94,7 +98,7 @@ public class SampleMenuHandler {
     }
 
     private void printRow(Sample s) {
-        io.println(String.format("%-8s %-15s %12d %6.2f %6d",
+        io.println(String.format("%-8s %-15s %12.1f %6.2f %6d",
                 s.getId(), s.getName(), s.getAvgProductionTime(), s.getYield(), s.getStock()));
     }
 }
