@@ -292,6 +292,27 @@
 
 ---
 
+### Phase 9-11 — 모니터링 ANSI 색상 표시
+
+**목표:** 모니터링 화면에서 주문 상태 및 재고 상태를 색상으로 직관적으로 구분한다.
+
+**작업 목록**
+- `MonitoringMenuHandler`에 ANSI 색상 상수 추가 (`char ESC = 0x1B` 기반)
+  - `CYAN` (`[96m`) — RESERVED 하늘색
+  - `GREEN` (`[92m`) — CONFIRMED 연두색 / 재고 여유 연두색
+  - `ORANGE` (`[38;5;214m`) — PRODUCING 주황색 / 재고 부족 주황색
+  - `PURPLE` (`[95m`) — RELEASE 연보라색
+  - `RED` (`[91m`) — 재고 고갈 빨강색
+- `colorOf(OrderStatus)` 헬퍼: 상태 → ANSI 색상 문자열 반환
+- `stockColorOf(String)` 헬퍼: 재고 상태 문자열(`여유`/`부족`/`고갈`) → ANSI 색상 반환
+- `showOrdersByStatus()`: 상태 헤더·테이블 헤더·구분선·각 행에 색상 적용 후 `RESET`
+- `showStockStatus()`: 각 시료 행에 재고 상태별 색상 적용 후 `RESET`
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -334,4 +355,5 @@
 | 9-08 | 변경 직후 즉시 저장 | 각 핸들러에 `JsonDataStore` 주입, 성공 직후 `save()` |
 | 9-09 | 승인/거절 대기 없음 차단 + 거절 목록 조회 | `ApprovalMenuHandler` 즉시 차단, `listRejected()` 추가 |
 | 9-10 | 시료명·고객명 공백 차단 | `SampleMenuHandler`, `OrderMenuHandler` `isBlank()` 검증 |
+| 9-11 | 모니터링 ANSI 색상 표시 | `MonitoringMenuHandler` 상태별·재고별 ANSI 글자색 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
