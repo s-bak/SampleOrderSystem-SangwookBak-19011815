@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.domain.Order;
 import org.example.domain.OrderStatus;
+import org.example.domain.ProductionJob;
 import org.example.domain.ProductionQueue;
 import org.example.repository.OrderRepository;
 
@@ -19,13 +20,23 @@ public class ApprovalService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 ID입니다: " + orderId));
 
-        // CONFIRMED 주문이 이미 점유한 수량을 제외한 가용 재고
+        String sampleId = order.getSample().getId();
+
+        // CONFIRMED 주문이 이미 점유한 수량
         int confirmedQty = orderRepository.findByStatus(OrderStatus.CONFIRMED)
                 .stream()
-                .filter(o -> o.getSample().getId().equals(order.getSample().getId()))
+                .filter(o -> o.getSample().getId().equals(sampleId))
                 .mapToInt(Order::getQuantity)
                 .sum();
-        int available = order.getSample().getStock() - confirmedQty;
+
+        // 생산 중인 작업이 이미 재고에 추가한 수량 (해당 물량도 해당 주문에 귀속)
+        int producingStockAdded = productionQueue.getAll()
+                .stream()
+                .filter(job -> job.getOrder().getSample().getId().equals(sampleId))
+                .mapToInt(ProductionJob::getStockAdded)
+                .sum();
+
+        int available = order.getSample().getStock() - confirmedQty - producingStockAdded;
 
         if (available >= order.getQuantity()) {
             order.transitionTo(OrderStatus.CONFIRMED);
