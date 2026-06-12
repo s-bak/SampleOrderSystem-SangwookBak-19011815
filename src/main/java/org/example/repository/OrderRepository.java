@@ -22,6 +22,11 @@ public class OrderRepository {
         sequence++;
     }
 
+    /** DB 복원 전용 — sequence를 변경하지 않음 */
+    public void restoreFromDb(Order order) {
+        store.put(order.getOrderId(), order);
+    }
+
     public Optional<Order> findById(String orderId) {
         return Optional.ofNullable(store.get(orderId));
     }

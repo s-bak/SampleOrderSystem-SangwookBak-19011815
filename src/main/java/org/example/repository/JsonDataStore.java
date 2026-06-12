@@ -54,7 +54,7 @@ public class JsonDataStore {
                 Order order = Order.restore(
                         dto.orderId, dto.customerName, sample, dto.quantity,
                         OrderStatus.valueOf(dto.status), LocalDateTime.parse(dto.createdAt));
-                orderRepository.save(order);
+                orderRepository.restoreFromDb(order);
             }
 
             for (QueueItemDto dto : snapshot.productionQueue) {
