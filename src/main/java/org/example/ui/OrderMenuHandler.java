@@ -51,6 +51,10 @@ public class OrderMenuHandler {
         }
         io.print("고객명: ");
         String customerName = io.readLine();
+        if (customerName.isBlank()) {
+            io.println("[오류] 고객명은 공백일 수 없습니다.");
+            return;
+        }
         int quantity = io.readInt("주문 수량: ");
         try {
             Order order = orderService.placeOrder(sampleId, customerName, quantity);

@@ -282,6 +282,16 @@
 
 ---
 
+### Phase 9-10 — 시료명 · 고객명 공백 입력 차단
+
+**목표:** 시료 등록 시 시료명, 주문 등록 시 고객명이 공백이면 오류 메시지를 출력하고 중단한다.
+
+**작업 목록**
+- `SampleMenuHandler.register()`: 시료명 입력 직후 `isBlank()` 검증 → 공백이면 오류 출력 후 반환
+- `OrderMenuHandler.placeOrder()`: 고객명 입력 직후 `isBlank()` 검증 → 공백이면 오류 출력 후 반환
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -323,4 +333,5 @@
 | 9-07 | 주문 시료 ID 검증 + 목록 표시 | 주문 등록 ID 루프, 주문 목록 `시료명 (ID)` 출력 |
 | 9-08 | 변경 직후 즉시 저장 | 각 핸들러에 `JsonDataStore` 주입, 성공 직후 `save()` |
 | 9-09 | 승인/거절 대기 없음 차단 + 거절 목록 조회 | `ApprovalMenuHandler` 즉시 차단, `listRejected()` 추가 |
+| 9-10 | 시료명·고객명 공백 차단 | `SampleMenuHandler`, `OrderMenuHandler` `isBlank()` 검증 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
