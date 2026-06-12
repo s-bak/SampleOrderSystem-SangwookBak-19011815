@@ -2,8 +2,6 @@ package org.example.ui;
 
 import org.example.domain.ProductionJob;
 import org.example.domain.ProductionQueue;
-import org.example.repository.JsonDataStore;
-import org.example.service.ProductionService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,15 +12,11 @@ import java.util.Optional;
 public class ProductionMenuHandler {
 
     private final ConsoleIO io;
-    private final ProductionService productionService;
     private final ProductionQueue productionQueue;
-    private final JsonDataStore dataStore;
 
-    public ProductionMenuHandler(ConsoleIO io, ProductionService productionService, ProductionQueue productionQueue, JsonDataStore dataStore) {
+    public ProductionMenuHandler(ConsoleIO io, ProductionQueue productionQueue) {
         this.io = io;
-        this.productionService = productionService;
         this.productionQueue = productionQueue;
-        this.dataStore = dataStore;
     }
 
     public void handle() {
@@ -58,16 +52,6 @@ public class ProductionMenuHandler {
                 "주문번호", "시료명", "시료ID", "주문량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
         io.println("-".repeat(83));
         printCurrentJobRow(job, progressPct);
-
-        if (progressPct >= 100.0) {
-            try {
-                var completed = productionService.complete(job.getOrder().getOrderId());
-                dataStore.save();
-                io.println("[생산 완료] 재고 자동 업데이트: " + completed.getSample().getStock() + "개");
-            } catch (Exception e) {
-                io.println("[오류] " + e.getMessage());
-            }
-        }
     }
 
     private double calcProgress(ProductionJob job) {

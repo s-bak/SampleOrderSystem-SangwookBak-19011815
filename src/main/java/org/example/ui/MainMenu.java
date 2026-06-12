@@ -42,7 +42,7 @@ public class MainMenu {
         this.approvalHandler = new ApprovalMenuHandler(io, approvalService, orderRepository, dataStore);
         this.monitoringHandler = new MonitoringMenuHandler(io, monitoringService);
         this.releaseHandler = new ReleaseMenuHandler(io, releaseService, orderRepository, dataStore);
-        this.productionHandler = new ProductionMenuHandler(io, productionService, productionQueue, dataStore);
+        this.productionHandler = new ProductionMenuHandler(io, productionQueue);
         this.dataStore = dataStore;
     }
 

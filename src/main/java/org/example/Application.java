@@ -7,6 +7,7 @@ import org.example.repository.SampleRepository;
 import org.example.service.ApprovalService;
 import org.example.service.MonitoringService;
 import org.example.service.OrderService;
+import org.example.service.ProductionScheduler;
 import org.example.service.ProductionService;
 import org.example.service.ReleaseService;
 import org.example.service.SampleService;
@@ -34,8 +35,13 @@ public class Application {
         ReleaseService releaseSvc = new ReleaseService(orderRepo);
         MonitoringService monitorSvc = new MonitoringService(sampleRepo, orderRepo);
 
+        ProductionScheduler scheduler = new ProductionScheduler(queue, productionSvc, dataStore);
+        scheduler.start();
+
         ConsoleIO io = new ConsoleIO(System.in, System.out);
         new MainMenu(io, sampleSvc, orderSvc, approvalSvc, productionSvc,
                 releaseSvc, monitorSvc, queue, orderRepo, dataStore).run();
+
+        scheduler.stop();
     }
 }
