@@ -26,16 +26,18 @@ public class ApprovalMenuHandler {
         while (true) {
             io.println("\n--- 주문 승인 / 거절 ---");
             io.println("1. 접수 주문 목록 조회");
-            io.println("2. 주문 승인");
-            io.println("3. 주문 거절");
+            io.println("2. 거절 주문 목록 조회");
+            io.println("3. 주문 승인");
+            io.println("4. 주문 거절");
             io.println("0. 뒤로");
             io.print("선택> ");
             String input = io.readLine();
 
             switch (input) {
                 case "1" -> listReserved();
-                case "2" -> approve();
-                case "3" -> reject();
+                case "2" -> listRejected();
+                case "3" -> approve();
+                case "4" -> reject();
                 case "0" -> { return; }
                 default -> io.println("[오류] 올바른 메뉴 번호를 입력해주세요.");
             }
@@ -58,7 +60,27 @@ public class ApprovalMenuHandler {
         }
     }
 
+    private void listRejected() {
+        List<Order> list = orderRepository.findByStatus(OrderStatus.REJECTED);
+        if (list.isEmpty()) {
+            io.println("거절된 주문이 없습니다.");
+            return;
+        }
+        io.println(String.format("%-8s %-10s %-15s %6s %s",
+                "주문ID", "고객명", "시료명", "수량", "등록일시"));
+        io.println("-".repeat(60));
+        for (Order o : list) {
+            io.println(String.format("%-8s %-10s %-15s %6d %s",
+                    o.getOrderId(), o.getCustomerName(), o.getSample().getName(),
+                    o.getQuantity(), o.getCreatedAt().toString().replace("T", " ").substring(0, 19)));
+        }
+    }
+
     private void approve() {
+        if (orderRepository.findByStatus(OrderStatus.RESERVED).isEmpty()) {
+            io.println("[오류] 대기 중인 주문이 없습니다.");
+            return;
+        }
         io.print("승인할 주문 ID: ");
         String orderId = io.readLine();
         try {
@@ -71,6 +93,10 @@ public class ApprovalMenuHandler {
     }
 
     private void reject() {
+        if (orderRepository.findByStatus(OrderStatus.RESERVED).isEmpty()) {
+            io.println("[오류] 대기 중인 주문이 없습니다.");
+            return;
+        }
         io.print("거절할 주문 ID: ");
         String orderId = io.readLine();
         try {

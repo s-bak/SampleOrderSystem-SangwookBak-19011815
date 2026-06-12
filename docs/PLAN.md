@@ -270,6 +270,18 @@
 
 ---
 
+### Phase 9-09 — 승인/거절 대기 주문 없음 즉시 차단 + 거절 주문 목록 조회
+
+**목표:** 대기 주문이 없을 때 승인·거절 진입을 즉시 차단하고, 거절된 주문 내역 조회 기능을 추가한다.
+
+**작업 목록**
+- `ApprovalMenuHandler.approve()`: `RESERVED` 주문 목록이 비어 있으면 오류 메시지 출력 후 즉시 반환 (주문 ID 입력 프롬프트 생략)
+- `ApprovalMenuHandler.reject()`: 동일하게 대기 주문 없음 시 즉시 반환
+- `ApprovalMenuHandler`: 메뉴에 **2. 거절 주문 목록 조회** 추가 → 기존 승인/거절은 3·4번으로 재번호
+- `ApprovalMenuHandler.listRejected()`: `REJECTED` 상태 주문 테이블 출력; 없으면 "거절된 주문이 없습니다" 안내
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -310,4 +322,5 @@
 | 9-06 | 시료 목록 테이블 정렬 | `+---+` 구분선, `String.format` 기준 컬럼 정렬 |
 | 9-07 | 주문 시료 ID 검증 + 목록 표시 | 주문 등록 ID 루프, 주문 목록 `시료명 (ID)` 출력 |
 | 9-08 | 변경 직후 즉시 저장 | 각 핸들러에 `JsonDataStore` 주입, 성공 직후 `save()` |
+| 9-09 | 승인/거절 대기 없음 차단 + 거절 목록 조회 | `ApprovalMenuHandler` 즉시 차단, `listRejected()` 추가 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |
