@@ -56,8 +56,9 @@ class SampleTest {
     }
 
     @Test
-    void avgProductionTime_zero_ok() {
-        assertDoesNotThrow(() -> new Sample("S-001", "Test", 0.0, 0.8, 10));
+    void avgProductionTime_zero_throws() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Sample("S-001", "Test", 0.0, 0.8, 10));
     }
 
     @Test

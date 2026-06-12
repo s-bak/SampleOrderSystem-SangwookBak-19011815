@@ -15,8 +15,8 @@ public class Sample {
         if (stock < 0) {
             throw new IllegalArgumentException("재고 수량은 0 이상이어야 합니다.");
         }
-        if (avgProductionTime < 0) {
-            throw new IllegalArgumentException("평균 생산시간은 0 이상이어야 합니다.");
+        if (avgProductionTime <= 0) {
+            throw new IllegalArgumentException("평균 생산시간은 0 초과여야 합니다.");
         }
         this.id = id;
         this.name = name;
