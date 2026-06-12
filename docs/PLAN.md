@@ -461,6 +461,54 @@
 
 ---
 
+### Phase 9-21 — 대기 주문 확인에 시료 ID · 주문량 컬럼 추가
+
+**목표:** 대기 큐 조회 화면에 시료 ID와 주문량을 함께 표시한다.
+
+**작업 목록**
+- `ProductionMenuHandler.showWaiting()`: 헤더에 `시료ID`, `주문량` 컬럼 추가 (구분선 67 → 85)
+- `ProductionMenuHandler.printJobRow()`: `order.getSample().getId()`, `order.getQuantity()` 출력 추가
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
+### Phase 9-22 — 생산 완료 시 재고 단위별 점진 업데이트
+
+**목표:** 진행률 100% 시 일괄 재고 반영 대신, 생산 진행에 따라 1개씩 재고를 추가한다.
+
+**작업 목록**
+- `ProductionJob`: `stockAdded(int)` 필드 추가; `addStock(int)`, `getStockAdded()`, `getRemainingShortfall()` 제공
+  - `restore()` 시그니처에 `stockAdded` 파라미터 추가
+- `ProductionScheduler.checkAndComplete()` 재구성
+  - `msPerUnit = totalProductionTime × 60,000 / shortfall`
+  - `expectedUnits = min(shortfall, floor(elapsedMs / msPerUnit))`
+  - `newUnits = expectedUnits − stockAdded` 만큼 `increaseStock` + `addStock` + `dataStore.save()`
+  - `stockAdded >= shortfall` 시 `productionService.complete()` 호출
+- `ProductionService.complete()`: `increaseStock` 제거 — 재고는 스케줄러가 모두 추가한 뒤 호출됨
+- `JsonDataStore.QueueItemDto`: `stockAdded` 필드 추가, save/load 반영
+- `ProductionMenuHandler.printCurrentJobRow()`: 부족수량 컬럼을 `getRemainingShortfall()`로 표시
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
+### Phase 9-23 — 가용 재고 계산 시 생산 중 기추가 재고 차감
+
+**목표:** 부분 생산 중인 작업이 이미 재고에 추가한 수량(`stockAdded`)을 가용 재고에서 차감하여 신규 주문의 shortfall을 정확히 산정한다.
+
+**작업 목록**
+- `ApprovalService.approve()`: 가용 재고 계산식 확장
+  - `producingStockAdded = sum(job.getStockAdded())` (동일 시료의 생산 중 작업 전체)
+  - `available = stock − confirmedQty − producingStockAdded`
+
+**검증 기준**
+- `./gradlew test` BUILD SUCCESSFUL
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -512,4 +560,7 @@
 | 9-18 | 재고 차감 시점 출고로 이동 | 승인 시 재고 불변, 가용=stock−CONFIRMED, 출고 시 `decreaseStock` |
 | 9-19 | 재고 상태 기준 단순화 | 고갈=stock==0, 부족=stock>0&대기>0, 여유=stock>0&대기없음 |
 | 9-20 | 생산 완료 백그라운드 자동 처리 | `ProductionScheduler` 1초 주기 데몬 스레드, UI 독립 자동 완료 |
+| 9-21 | 대기 주문 시료ID·주문량 표시 | `printJobRow()` 시료ID·주문량 컬럼 추가 |
+| 9-22 | 재고 단위별 점진 업데이트 | `ProductionJob.stockAdded`, 스케줄러 msPerUnit 기반 1개씩 증가, `complete()`에서 `increaseStock` 제거 |
+| 9-23 | 가용 재고 계산 버그 수정 | `available = stock − confirmedQty − producingStockAdded` |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

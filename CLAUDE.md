@@ -25,9 +25,9 @@ Java 17+ / Gradle / JUnit 5 기반 콘솔 애플리케이션.
 |---|---|
 | `Sample` | 시료. ID(`S-XXX`), 시료명, 평균 생산시간(`double`, 0 초과), 수율(0 < yield ≤ 1), 재고 수량 |
 | `Order` | 주문. 주문 ID, 고객명, 시료 참조, 주문 수량, 상태 |
-| `ProductionJob` | 생산 작업. Order, 실생산량, 소요시간, 접수시각(`enqueuedAt`), 생산시작시각(`startedAt`, null=대기 중) 보유 |
+| `ProductionJob` | 생산 작업. Order, shortfall, 실생산량, 소요시간, `enqueuedAt`, `startedAt`(null=대기), `stockAdded`(지금까지 재고에 추가된 수량) 보유 |
 | `ProductionQueue` | 생산 라인. FIFO 큐; `enqueue(order, shortfall)`로 삽입; 빈 큐 삽입 시 즉시 `start()`, 선행 작업 있으면 대기; 완료 시 `startNext()`로 순차 시작 |
-| `ProductionScheduler` | 백그라운드 데몬 스레드(1초 주기). 현재 작업 진행률 ≥ 100% 감지 시 `complete()` + `dataStore.save()` 자동 호출 |
+| `ProductionScheduler` | 백그라운드 데몬 스레드(1초 주기). `msPerUnit` 기반으로 완성 단위 수 계산, 신규 단위마다 `increaseStock(1)` + `addStock(1)`; `stockAdded >= shortfall` 시 `complete()` 호출 |
 
 ### 주문 상태 (`OrderStatus`)
 
@@ -44,7 +44,9 @@ CONFIRMED → RELEASE   (출고 처리)
 
 ### 재고 모델
 
-- **가용 재고** = `sample.stock − sum(CONFIRMED 주문 수량, 동일 시료 기준)`
+- **가용 재고** = `stock − confirmedQty − producingStockAdded`
+  - `confirmedQty`: 동일 시료의 CONFIRMED 주문 수량 합계
+  - `producingStockAdded`: 동일 시료의 생산 중 작업에서 이미 재고에 추가된 수량(`stockAdded`) 합계
 - 승인 시 가용 재고 ≥ 주문 수량 → 재고 불변 → `CONFIRMED`
 - 승인 시 가용 재고 부족 → shortfall = 주문 수량 − max(0, 가용 재고) → 생산 큐 등록 → `PRODUCING`
 - 출고(`RELEASE`) 시점에만 `decreaseStock(quantity)` 호출
@@ -65,7 +67,8 @@ CONFIRMED → RELEASE   (출고 처리)
 총 생산 시간 = 평균 생산시간 × 실 생산량  [단위: min]
 ```
 
-생산 완료 시 재고에는 부족분(shortfall)만큼만 추가한다 (실생산량이 아닌 정확한 수요분 보충).
+재고는 단위별로 점진 추가: `msPerUnit = totalProductionTime × 60,000 / shortfall`, 매 완성 단위마다 `increaseStock(1)`.
+`complete()`는 재고 변경 없이 상태 전이(`PRODUCING → CONFIRMED`)와 다음 작업 시작만 처리한다.
 
 ---
 
@@ -75,7 +78,7 @@ CONFIRMED → RELEASE   (출고 처리)
 2. 주문 접수 — 주문 등록 (`RESERVED`) / 주문 목록 조회
 3. 주문 승인/거절 — 접수 주문 목록 / 거절 주문 목록 / 승인(재고 확인) / 거절; 대기 주문 없으면 승인·거절 즉시 차단
 4. 모니터링 — 상태별 주문 수(RESERVED=하늘색·PRODUCING=주황색·CONFIRMED=연두색·RELEASE=연보라색, 시료명 옆 시료 ID 표시) + 시료별 재고 현황(여유=연두색·부족=주황색·고갈=빨강색)
-5. 생산 라인 — 생산 현황(주문번호·시료명·시료ID·주문량·부족수량·실생산량·소요시간·진행률) / 대기 큐(접수시각 포함); 진행률 100% 시 백그라운드 스케줄러가 자동 완료 처리
+5. 생산 라인 — 생산 현황(주문번호·시료명·시료ID·주문량·부족수량(잔여)·실생산량·소요시간·진행률) / 대기 큐(시료ID·주문량·접수시각 포함); 스케줄러가 단위별 재고 추가·자동 완료 처리
 6. 출고 처리 — `CONFIRMED` 주문 출고 → 재고 차감 → `RELEASE`
 
 ---
