@@ -566,6 +566,28 @@
 
 ---
 
+### Phase 9-28 — 모든 입력에서 빈 값 입력 시 이전 메뉴 복귀
+
+**목표:** 어떤 입력 단계에서든 빈 값(Enter)을 입력하면 `[안내] 입력이 없어 이전 메뉴로 돌아갑니다.` 메시지를 출력하고 해당 메서드를 즉시 반환한다.
+
+**작업 목록**
+- `SampleMenuHandler.register()`:
+  - 시료 ID, 시료명 입력 루프에 `isEmpty()` 즉시 반환 추가
+  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체하여 빈 값 구분 처리 (평균 생산시간, 수율)
+- `SampleMenuHandler.search()`:
+  - 항목 선택, ID/명 검색어, 평균 생산시간/수율 입력에 `isEmpty()` 즉시 반환 추가
+  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체
+- `OrderMenuHandler.placeOrder()`:
+  - 시료 ID, 고객명 입력 루프에 `isEmpty()` 즉시 반환 추가
+  - `readInt()` 호출 → `readLine()` + `Integer.parseInt()` 파싱으로 교체하여 빈 값 구분 처리
+- `ApprovalMenuHandler.approve()` / `reject()`: 주문 ID `isEmpty()` 즉시 반환 추가
+- `ReleaseMenuHandler.release()`: 주문 ID `isEmpty()` 즉시 반환 추가
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ### Phase 9-29 — Corner Case 단위 테스트 보강 (90 → 157개)
 
 **목표:** 기존 단위 테스트에서 커버하지 않은 경계 조건·복원 경로·예외 흐름을 추가하여 테스트 커버리지를 높인다.
@@ -600,28 +622,6 @@
 
 **검증 기준**
 - `./gradlew test` BUILD SUCCESSFUL
-
----
-
-### Phase 9-28 — 모든 입력에서 빈 값 입력 시 이전 메뉴 복귀
-
-**목표:** 어떤 입력 단계에서든 빈 값(Enter)을 입력하면 `[안내] 입력이 없어 이전 메뉴로 돌아갑니다.` 메시지를 출력하고 해당 메서드를 즉시 반환한다.
-
-**작업 목록**
-- `SampleMenuHandler.register()`:
-  - 시료 ID, 시료명 입력 루프에 `isEmpty()` 즉시 반환 추가
-  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체하여 빈 값 구분 처리 (평균 생산시간, 수율)
-- `SampleMenuHandler.search()`:
-  - 항목 선택, ID/명 검색어, 평균 생산시간/수율 입력에 `isEmpty()` 즉시 반환 추가
-  - `readDouble()` 호출 → `readLine()` + 직접 파싱으로 교체
-- `OrderMenuHandler.placeOrder()`:
-  - 시료 ID, 고객명 입력 루프에 `isEmpty()` 즉시 반환 추가
-  - `readInt()` 호출 → `readLine()` + `Integer.parseInt()` 파싱으로 교체하여 빈 값 구분 처리
-- `ApprovalMenuHandler.approve()` / `reject()`: 주문 ID `isEmpty()` 즉시 반환 추가
-- `ReleaseMenuHandler.release()`: 주문 ID `isEmpty()` 즉시 반환 추가
-
-**검증 기준**
-- `./gradlew build` 성공
 
 ---
 
