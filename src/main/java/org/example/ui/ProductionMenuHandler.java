@@ -51,15 +51,14 @@ public class ProductionMenuHandler {
             return;
         }
         ProductionJob job = currentOpt.get();
-
-        updateStockIncremental(job);
+        double progressPct = calcProgress(job);
 
         io.println(String.format("%-10s %-15s %-8s %6s %8s %8s %8s %12s %8s",
                 "주문번호", "시료명", "시료ID", "주문량", "재고수량", "부족수량", "실생산량", "소요시간(min)", "진행률(%)"));
         io.println("-".repeat(92));
-        printCurrentJobRow(job);
+        printCurrentJobRow(job, progressPct);
 
-        if (job.getRemainingUnits() == 0) {
+        if (progressPct >= 100.0) {
             try {
                 var completed = productionService.complete(job.getOrder().getOrderId());
                 dataStore.save();
@@ -70,31 +69,22 @@ public class ProductionMenuHandler {
         }
     }
 
-    // avgProductionTime 단위로 1개씩 생산 완료된 수량을 재고에 증분 반영
-    private void updateStockIncremental(ProductionJob job) {
+    private double calcProgress(ProductionJob job) {
         double elapsedMs = Duration.between(job.getStartedAt(), LocalDateTime.now()).toMillis();
-        double avgMs = job.getOrder().getSample().getAvgProductionTime() * 60_000;
-        int unitsProduced = (int) Math.min(job.getActualProductionCount(), elapsedMs / avgMs);
-        int newUnits = unitsProduced - job.getUnitsAdded();
-        if (newUnits > 0) {
-            job.getOrder().getSample().increaseStock(newUnits);
-            job.recordUnitsAdded(newUnits);
-            dataStore.save();
-        }
+        return Math.min(100.0, elapsedMs / (job.getTotalProductionTime() * 60_000) * 100.0);
     }
 
-    private void printCurrentJobRow(ProductionJob job) {
+    private void printCurrentJobRow(ProductionJob job, double progressPct) {
         var order = job.getOrder();
         var sample = order.getSample();
-        double progressPct = job.getActualProductionCount() == 0 ? 100.0
-                : (double) job.getUnitsAdded() / job.getActualProductionCount() * 100.0;
+        int shortfall = order.getQuantity() - sample.getStock();
         io.println(String.format("%-10s %-15s %-8s %6d %8d %8d %8d %12.1f %8.1f",
                 order.getOrderId(),
                 sample.getName(),
                 sample.getId(),
                 order.getQuantity(),
                 sample.getStock(),
-                job.getShortfall(),
+                shortfall,
                 job.getActualProductionCount(),
                 job.getTotalProductionTime(),
                 progressPct));
