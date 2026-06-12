@@ -1,6 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
 }
+
+application {
+    mainClass = 'org.example.Application'
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
 
 group = 'org.example'
 version = '1.0-SNAPSHOT'
@@ -17,4 +25,9 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8'
+}
+
+run {
+    jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8'
 }
