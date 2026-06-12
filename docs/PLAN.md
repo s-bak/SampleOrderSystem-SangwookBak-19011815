@@ -356,4 +356,5 @@
 | 9-09 | 승인/거절 대기 없음 차단 + 거절 목록 조회 | `ApprovalMenuHandler` 즉시 차단, `listRejected()` 추가 |
 | 9-10 | 시료명·고객명 공백 차단 | `SampleMenuHandler`, `OrderMenuHandler` `isBlank()` 검증 |
 | 9-11 | 모니터링 ANSI 색상 표시 | `MonitoringMenuHandler` 상태별·재고별 ANSI 글자색 |
+| 9-12 | 메인 메뉴 순서 변경 | 5↔6 스왑: 생산 라인(5) → 출고 처리(6) |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

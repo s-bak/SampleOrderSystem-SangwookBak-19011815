@@ -57,8 +57,8 @@ public class MainMenu {
                 case "2" -> orderHandler.handle();
                 case "3" -> approvalHandler.handle();
                 case "4" -> monitoringHandler.handle();
-                case "5" -> releaseHandler.handle();
-                case "6" -> productionHandler.handle();
+                case "5" -> productionHandler.handle();
+                case "6" -> releaseHandler.handle();
                 case "0" -> {
                     io.println("시스템을 종료합니다.");
                     return;
@@ -79,8 +79,8 @@ public class MainMenu {
         io.println("2. 주문 접수");
         io.println("3. 주문 승인 / 거절");
         io.println("4. 모니터링");
-        io.println("5. 출고 처리");
-        io.println("6. 생산 라인");
+        io.println("5. 생산 라인");
+        io.println("6. 출고 처리");
         io.println("0. 종료");
     }
 }
