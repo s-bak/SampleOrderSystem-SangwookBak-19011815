@@ -313,6 +313,34 @@
 
 ---
 
+### Phase 9-12 — 메인 메뉴 5·6번 순서 변경
+
+**목표:** 생산 라인(5번)과 출고 처리(6번)의 메뉴 순서를 업무 흐름에 맞게 조정한다.
+
+**작업 목록**
+- `MainMenu.printHeader()`: 5번 ↔ 6번 메뉴 텍스트 교체
+- `MainMenu.run()` switch: `case "5"` → `productionHandler`, `case "6"` → `releaseHandler`
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
+### Phase 9-13 — 모니터링 주문량 확인에 시료 ID 표시
+
+**목표:** 주문량 확인 화면에서 시료명 옆에 시료 ID를 `시료명 (S-XXX)` 형태로 함께 표시한다.
+
+**작업 목록**
+- `MonitoringMenuHandler.showOrdersByStatus()`: 시료 컬럼 너비 `%-15s` → `%-22s`로 확장
+- 헤더 컬럼명 `시료명` → `시료명 (ID)`
+- 데이터 행: `o.getSample().getName() + " (" + o.getSample().getId() + ")"` 조합 출력
+- 구분선 길이 44 → 51로 조정
+
+**검증 기준**
+- `./gradlew build` 성공
+
+---
+
 ## Phase 10 — 통합 시나리오 검증 및 마무리
 
 **목표:** 전체 비즈니스 흐름을 end-to-end 시나리오로 검증하고 코드를 정리한다.
@@ -357,4 +385,5 @@
 | 9-10 | 시료명·고객명 공백 차단 | `SampleMenuHandler`, `OrderMenuHandler` `isBlank()` 검증 |
 | 9-11 | 모니터링 ANSI 색상 표시 | `MonitoringMenuHandler` 상태별·재고별 ANSI 글자색 |
 | 9-12 | 메인 메뉴 순서 변경 | 5↔6 스왑: 생산 라인(5) → 출고 처리(6) |
+| 9-13 | 모니터링 주문량 시료 ID 표시 | `showOrdersByStatus()` 시료명 옆 `(S-XXX)` 추가 |
 | 10 | 통합 검증 | `IntegrationTest`, 전체 `./gradlew test` |

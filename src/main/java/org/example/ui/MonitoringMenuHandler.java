@@ -52,12 +52,13 @@ public class MonitoringMenuHandler {
             String color = colorOf(status);
             io.println(color + "\n[" + status + "] " + orders.size() + "건" + RESET);
             if (!orders.isEmpty()) {
-                io.println(color + String.format("  %-8s %-10s %-15s %6s", "주문ID", "고객명", "시료명", "수량") + RESET);
-                io.println(color + "  " + "-".repeat(44) + RESET);
+                io.println(color + String.format("  %-8s %-10s %-22s %6s", "주문ID", "고객명", "시료명 (ID)", "수량") + RESET);
+                io.println(color + "  " + "-".repeat(51) + RESET);
                 for (Order o : orders) {
-                    io.println(color + String.format("  %-8s %-10s %-15s %6d",
+                    String sampleLabel = o.getSample().getName() + " (" + o.getSample().getId() + ")";
+                    io.println(color + String.format("  %-8s %-10s %-22s %6d",
                             o.getOrderId(), o.getCustomerName(),
-                            o.getSample().getName(), o.getQuantity()) + RESET);
+                            sampleLabel, o.getQuantity()) + RESET);
                 }
             }
         }
