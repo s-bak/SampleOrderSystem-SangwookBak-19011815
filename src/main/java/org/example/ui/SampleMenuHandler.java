@@ -80,9 +80,46 @@ public class SampleMenuHandler {
     }
 
     private void search() {
-        io.print("검색 키워드: ");
-        String keyword = io.readLine();
-        List<Sample> list = sampleService.search(keyword);
+        io.println("검색 항목:");
+        io.println("1. 시료 ID");
+        io.println("2. 시료명");
+        io.println("3. 평균 생산시간");
+        io.println("4. 수율");
+        io.print("선택> ");
+        String field = io.readLine();
+
+        List<Sample> list;
+        switch (field) {
+            case "1" -> {
+                io.print("시료 ID 검색어: ");
+                list = sampleService.searchById(io.readLine());
+            }
+            case "2" -> {
+                io.print("시료명 검색어: ");
+                list = sampleService.search(io.readLine());
+            }
+            case "3" -> {
+                double time = io.readDouble("평균 생산시간: ");
+                if (Double.isNaN(time)) {
+                    io.println("[오류] 올바른 숫자를 입력해주세요.");
+                    return;
+                }
+                list = sampleService.searchByAvgProductionTime(time);
+            }
+            case "4" -> {
+                double yield = io.readDouble("수율: ");
+                if (Double.isNaN(yield)) {
+                    io.println("[오류] 올바른 숫자를 입력해주세요.");
+                    return;
+                }
+                list = sampleService.searchByYield(yield);
+            }
+            default -> {
+                io.println("[오류] 올바른 항목 번호를 입력해주세요.");
+                return;
+            }
+        }
+
         if (list.isEmpty()) {
             io.println("검색 결과가 없습니다.");
             return;

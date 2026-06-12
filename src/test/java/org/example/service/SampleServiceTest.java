@@ -85,4 +85,44 @@ class SampleServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> service.findById("S-999"));
     }
+
+    @Test
+    void searchById_match() {
+        service.register("S-001", "AlphaChip", 30.0, 0.85, 0);
+        service.register("S-002", "BetaChip", 20.0, 0.9, 0);
+        List<Sample> result = service.searchById("001");
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void searchById_noMatch() {
+        service.register("S-001", "AlphaChip", 30.0, 0.85, 0);
+        assertTrue(service.searchById("999").isEmpty());
+    }
+
+    @Test
+    void searchByAvgProductionTime_match() {
+        service.register("S-001", "AlphaChip", 10.5, 0.85, 0);
+        service.register("S-002", "BetaChip", 20.0, 0.9, 0);
+        List<Sample> result = service.searchByAvgProductionTime(10.5);
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void searchByYield_match() {
+        service.register("S-001", "AlphaChip", 30.0, 0.9, 0);
+        service.register("S-002", "BetaChip", 20.0, 0.8, 0);
+        // 0.9와 0.90은 동일한 double 값
+        List<Sample> result = service.searchByYield(0.90);
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void searchByYield_noMatch() {
+        service.register("S-001", "AlphaChip", 30.0, 0.85, 0);
+        assertTrue(service.searchByYield(0.5).isEmpty());
+    }
 }

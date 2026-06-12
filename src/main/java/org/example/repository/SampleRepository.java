@@ -36,4 +36,34 @@ public class SampleRepository {
         }
         return result;
     }
+
+    public List<Sample> findByIdContaining(String keyword) {
+        List<Sample> result = new ArrayList<>();
+        for (Sample sample : store.values()) {
+            if (sample.getId().contains(keyword)) {
+                result.add(sample);
+            }
+        }
+        return result;
+    }
+
+    public List<Sample> findByAvgProductionTime(double time) {
+        List<Sample> result = new ArrayList<>();
+        for (Sample sample : store.values()) {
+            if (Double.compare(sample.getAvgProductionTime(), time) == 0) {
+                result.add(sample);
+            }
+        }
+        return result;
+    }
+
+    public List<Sample> findByYield(double yield) {
+        List<Sample> result = new ArrayList<>();
+        for (Sample sample : store.values()) {
+            if (Double.compare(sample.getYield(), yield) == 0) {
+                result.add(sample);
+            }
+        }
+        return result;
+    }
 }

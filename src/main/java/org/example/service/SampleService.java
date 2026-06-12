@@ -38,4 +38,16 @@ public class SampleService {
     public boolean existsById(String id) {
         return sampleRepository.findById(id).isPresent();
     }
+
+    public List<Sample> searchById(String keyword) {
+        return sampleRepository.findByIdContaining(keyword);
+    }
+
+    public List<Sample> searchByAvgProductionTime(double time) {
+        return sampleRepository.findByAvgProductionTime(time);
+    }
+
+    public List<Sample> searchByYield(double yield) {
+        return sampleRepository.findByYield(yield);
+    }
 }

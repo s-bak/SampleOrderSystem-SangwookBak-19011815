@@ -79,4 +79,50 @@ class SampleRepositoryTest {
         List<Sample> result = repo.findByNameContaining("Alpha");
         assertEquals(2, result.size());
     }
+
+    @Test
+    void findByIdContaining_match() {
+        repo.save(sample("S-001", "Alpha"));
+        repo.save(sample("S-002", "Beta"));
+        List<Sample> result = repo.findByIdContaining("001");
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void findByIdContaining_noMatch() {
+        repo.save(sample("S-001", "Alpha"));
+        assertTrue(repo.findByIdContaining("999").isEmpty());
+    }
+
+    @Test
+    void findByAvgProductionTime_match() {
+        repo.save(new Sample("S-001", "Alpha", 10.0, 0.8, 0));
+        repo.save(new Sample("S-002", "Beta", 20.5, 0.9, 0));
+        List<Sample> result = repo.findByAvgProductionTime(10.0);
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void findByAvgProductionTime_noMatch() {
+        repo.save(new Sample("S-001", "Alpha", 10.0, 0.8, 0));
+        assertTrue(repo.findByAvgProductionTime(99.0).isEmpty());
+    }
+
+    @Test
+    void findByYield_match() {
+        repo.save(new Sample("S-001", "Alpha", 10.0, 0.9, 0));
+        repo.save(new Sample("S-002", "Beta", 20.0, 0.8, 0));
+        // 0.9와 0.90은 수학적으로 동일
+        List<Sample> result = repo.findByYield(0.90);
+        assertEquals(1, result.size());
+        assertEquals("S-001", result.get(0).getId());
+    }
+
+    @Test
+    void findByYield_noMatch() {
+        repo.save(new Sample("S-001", "Alpha", 10.0, 0.8, 0));
+        assertTrue(repo.findByYield(0.5).isEmpty());
+    }
 }
